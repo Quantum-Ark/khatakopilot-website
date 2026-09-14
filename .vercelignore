@@ -1,0 +1,4 @@
+# Deploy ignore
+.git/
+node_modules/
+dist/

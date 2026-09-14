@@ -1,0 +1,3 @@
+b0650a27e910ef6b0f1460b736d1a9f82448dfd0d5be4182b966ca544e287973 *dist/KhataCopilot-1.0.0-android.apk
+4cc7cdae091583811fe0000a736f20a82641f103b55798234816c91f19bf784e *dist/KhataCopilot-Setup-1.0.0.exe
+0a325140a0c6e5dd29012958afcdb9024165385ff8f20d7199fddadff3e008b7 *dist/KhataCopilot-1.0.0-windows-portable.zip

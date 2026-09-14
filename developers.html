@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Developers — verify builds &amp; build from source · KhataCopilot</title>
+<link rel="stylesheet" href="styles.css?v=3"></head>
+<body><div class="legal-body dev">
+<a class="backlink" href="index.html">← Back to KhataCopilot</a>
+<p class="kicker"><span class="rule"></span> For developers &amp; reviewers</p>
+<h1>Verify builds. Build from source.</h1>
+<p>End users never need this page. Everything below is for contributors, security reviewers and store-release engineers.</p>
+
+<h2>Verify before you trust</h2>
+<p>Every file has a SHA-256 in <code>dist/SHA256SUMS.txt</code>. Windows SmartScreen will warn on the unsigned installer — expected until code-signing lands. The in-app updater refuses any installer whose hash mismatches <code>release/latest.json</code>.</p>
+<pre><code>$ sha256sum -c SHA256SUMS.txt
+Android  b0650a27e910ef6b0f1460b736d1a9f82448dfd0d5be4182b966ca544e287973
+Windows setup  4cc7cdae091583811fe0000a736f20a82641f103b55798234816c91f19bf784e
+Windows portable  0a325140a0c6e5dd29012958afcdb9024165385ff8f20d7199fddadff3e008b7</code></pre>
+
+<h2 id="android">Android (store upload)</h2>
+<pre><code>flutter build appbundle --release --obfuscate --split-debug-info=build/symbols</code></pre>
+<p>Upload the AAB with Play App Signing — the debug APK in <code>dist/</code> is sideload-only.</p>
+
+<h2 id="windows">Windows installer + auto-update manifest</h2>
+<pre><code>$env:WINDOWS_CERT_PATH="C:\certs\khata.pfx"
+scripts/build-windows-installer.sh   # -&gt; dist/KhataCopilot-Setup-&lt;ver&gt;.exe + dist/latest.json</code></pre>
+<p>Needs Inno Setup 6 + a code-signing certificate.</p>
+
+<h2 id="macos">macOS</h2>
+<pre><code>scripts/build-macos-dmg.sh</code></pre>
+<p>Hardened runtime + <code>notarytool</code> notarisation on a Mac; mic/camera entitlements declared.</p>
+
+<h2 id="linux">Linux / shareable test pack</h2>
+<pre><code>flutter build linux --release
+scripts/build-shareable.sh   # -&gt; dist/ portable zip + APK + SHA256SUMS.txt</code></pre>
+</div></body></html>
