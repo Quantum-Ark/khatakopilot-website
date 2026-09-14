@@ -170,4 +170,187 @@
     es.forEach(function(e){ if(e.isIntersecting){ e.target.style.background = "#E9B44C"; } });
   }, {threshold:.8});
   dots.forEach(function(d){ dio.observe(d); });
+
+  /* ==========================================================================
+     CINEMATIC SCROLL-LINKED HERO SEQUENCE ANIMATION (Apple-level smooth)
+     - 50 progressive image frames (ezgif-frame-001.png / frame-001.png)
+     - Continuous requestAnimationFrame loop with smooth lerp interpolation
+     - High-DPI / Retina canvas scaling + cover containment
+     - Seamless background blending
+     - Respects prefers-reduced-motion
+     ========================================================================== */
+  var heroCanvas = document.getElementById("heroSequenceCanvas");
+  var heroTrack = document.getElementById("heroScrollTrack");
+
+  if(heroCanvas && heroTrack){
+    var ctx = heroCanvas.getContext("2d");
+    var totalFrames = 50;
+    var images = new Array(totalFrames);
+    var loaded = new Array(totalFrames);
+    var targetFrame = 0;
+    var currentFrame = 0;
+    var lastDrawnFrame = -1;
+    var isRenderLoopActive = false;
+
+    // Build frame URL helper (checks primary and fallback naming)
+    function getFrameUrl(idx){
+      var num = String(idx + 1).padStart(3, "0");
+      return "khatapng/ezgif-frame-" + num + ".png";
+    }
+
+    // High DPI Canvas resize handler
+    function resizeCanvas(){
+      if(!heroCanvas) return;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var w = heroCanvas.clientWidth || window.innerWidth;
+      var h = heroCanvas.clientHeight || window.innerHeight;
+      if(heroCanvas.width !== Math.round(w * dpr) || heroCanvas.height !== Math.round(h * dpr)){
+        heroCanvas.width = Math.round(w * dpr);
+        heroCanvas.height = Math.round(h * dpr);
+        lastDrawnFrame = -1; // Force repaint
+      }
+      drawFrame(Math.round(currentFrame));
+    }
+
+    // Render single frame with seamless cover scaling
+    function drawFrame(idx){
+      if(!ctx || !heroCanvas) return;
+      var img = images[idx];
+      // If the target frame hasn't finished loading yet, find the nearest loaded frame
+      if(!img || !img.complete || img.naturalWidth === 0){
+        for(var offset = 1; offset < totalFrames; offset++){
+          if(idx - offset >= 0 && images[idx - offset] && images[idx - offset].complete){
+            img = images[idx - offset];
+            break;
+          }
+          if(idx + offset < totalFrames && images[idx + offset] && images[idx + offset].complete){
+            img = images[idx + offset];
+            break;
+          }
+        }
+      }
+
+      if(!img || !img.complete || img.naturalWidth === 0) return;
+
+      var cw = heroCanvas.width;
+      var ch = heroCanvas.height;
+      var iw = img.naturalWidth;
+      var ih = img.naturalHeight;
+
+      // Calculate object-fit: cover scaling
+      var scale = Math.max(cw / iw, ch / ih);
+      var dw = iw * scale;
+      var dh = ih * scale;
+      var dx = (cw - dw) * 0.5;
+      var dy = (ch - dh) * 0.5;
+
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.drawImage(img, dx, dy, dw, dh);
+      lastDrawnFrame = idx;
+    }
+
+    // Calculate exact scroll progress inside the hero track
+    function updateScrollProgress(){
+      if(reduce){
+        targetFrame = 0;
+        currentFrame = 0;
+        drawFrame(0);
+        return;
+      }
+      var rect = heroTrack.getBoundingClientRect();
+      var maxScroll = rect.height - window.innerHeight;
+      if(maxScroll <= 0){
+        targetFrame = 0;
+        return;
+      }
+      // Distance scrolled past the top of the track
+      var scrolled = -rect.top;
+      var progress = scrolled / maxScroll;
+      if(progress < 0) progress = 0;
+      if(progress > 1) progress = 1;
+
+      targetFrame = progress * (totalFrames - 1);
+    }
+
+    // Continuous smooth animation loop using lerp interpolation
+    function animationLoop(){
+      if(!reduce){
+        var delta = targetFrame - currentFrame;
+        // Apple-style smooth ease: 0.12 factor provides snappy yet silky motion
+        if(Math.abs(delta) > 0.001){
+          currentFrame += delta * 0.12;
+        } else {
+          currentFrame = targetFrame;
+        }
+
+        var frameToDraw = Math.round(currentFrame);
+        if(frameToDraw < 0) frameToDraw = 0;
+        if(frameToDraw >= totalFrames) frameToDraw = totalFrames - 1;
+
+        if(frameToDraw !== lastDrawnFrame){
+          drawFrame(frameToDraw);
+        }
+      }
+
+      requestAnimationFrame(animationLoop);
+    }
+
+    // Preload frames progressively (key frames first for instant response)
+    function preloadFrames(){
+      // Priority 1: First and last frames for instant initial render
+      var priorityIndexes = [0, 10, 24, 35, 49];
+      priorityIndexes.forEach(function(i){
+        loadSingleFrame(i);
+      });
+
+      // Priority 2: Preload remaining frames
+      for(var i = 0; i < totalFrames; i++){
+        if(priorityIndexes.indexOf(i) === -1){
+          loadSingleFrame(i);
+        }
+      }
+    }
+
+    function loadSingleFrame(i){
+      if(images[i]) return;
+      var img = new Image();
+      img.src = getFrameUrl(i);
+      img.onload = function(){
+        loaded[i] = true;
+        // If this is the first frame or the current active target, render immediately
+        if(i === 0 && lastDrawnFrame === -1){
+          resizeCanvas();
+          drawFrame(0);
+        } else if(Math.round(currentFrame) === i){
+          drawFrame(i);
+        }
+      };
+      // Fallback to alternate naming if needed
+      img.onerror = function(){
+        var fallbackNum = String(i + 1).padStart(3, "0");
+        var fallbackImg = new Image();
+        fallbackImg.src = "khatapng/frame-" + fallbackNum + ".png";
+        fallbackImg.onload = function(){
+          images[i] = fallbackImg;
+          loaded[i] = true;
+          if(Math.round(currentFrame) === i) drawFrame(i);
+        };
+      };
+      images[i] = img;
+    }
+
+    // Initialize
+    preloadFrames();
+    resizeCanvas();
+    updateScrollProgress();
+
+    window.addEventListener("scroll", updateScrollProgress, {passive: true});
+    window.addEventListener("resize", function(){
+      resizeCanvas();
+      updateScrollProgress();
+    }, {passive: true});
+
+    // Start persistent render loop
+    requestAnimationFrame(animationLoop);
+  }
 })();

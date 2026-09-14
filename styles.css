@@ -52,6 +52,13 @@ footer .fine,.download .fine,.day .fine{color:#D3C8AF}
 .btn.line{background:transparent;color:var(--ink);border-color:var(--ink);padding:12px 22px}
 .btn.sm{padding:8px 16px;font-size:.86rem} .btn.lg{padding:15px 26px;font-size:1rem}
 
+/* cinematic hero scroll track & canvas */
+.hero-scroll-track{position:relative;height:420vh;background:transparent}
+.hero-canvas-sticky{position:sticky;top:0;left:0;width:100%;height:100vh;overflow:hidden;z-index:0;pointer-events:none;background:#FAF6EE}
+.hero-sequence-canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;opacity:0.92;transition:opacity .3s ease}
+.hero-canvas-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 50% 45%, rgba(250,246,238,0.22) 0%, rgba(250,246,238,0.72) 75%, rgba(250,246,238,0.96) 100%), linear-gradient(180deg, rgba(250,246,238,0.1) 0%, rgba(250,246,238,0.4) 60%, rgba(250,246,238,0.95) 100%);pointer-events:none}
+.hero-content-pin{position:relative;margin-top:-100vh;z-index:2;pointer-events:auto}
+
 /* hero */
 .hero{padding:56px 0 0;overflow:hidden}
 .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;max-width:1160px;margin:0 auto;padding:0 24px;align-items:center}
@@ -277,4 +284,7 @@ section{scroll-margin-top:70px}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
   html{scroll-behavior:auto} .reveal{opacity:1;transform:none}
+  .hero-scroll-track{height:auto!important}
+  .hero-canvas-sticky{position:absolute!important;height:100%!important}
+  .hero-content-pin{margin-top:0!important}
 }
