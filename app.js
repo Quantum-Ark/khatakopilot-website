@@ -118,41 +118,32 @@
   };
 
   CanvasScrubber.prototype.init = function () {
-    var self = this;
-    this.hasStartedFullPreload = false;
-
-    // Preload key anchor frame 0 immediately
-    this.preloadSingle(0);
-
-    // Chapter 1 is the immediate hero visible on arrival: preload all its frames right away
-    if (this.folder === "1") {
-      this.ensureLoaded();
-    }
-
+    this.preloadAll();
     this.resize();
   };
 
-  CanvasScrubber.prototype.ensureLoaded = function () {
-    if (this.hasStartedFullPreload) return;
-    this.hasStartedFullPreload = true;
+  CanvasScrubber.prototype.preloadAll = function () {
     var self = this;
-
-    // Load keyframe anchors first (0, 12, 25, 37, 49) for instant coverage
-    var keyframes = [0, 12, 25, 37, 49];
-    keyframes.forEach(function (idx) {
+    // Step 1: Preload anchor keyframes immediately for instant coverage across the whole chapter
+    var anchors = [0, 10, 20, 30, 40, 49];
+    anchors.forEach(function (idx) {
       self.preloadSingle(idx);
     });
 
-    // Stream all remaining frames rapidly into memory
+    // Step 2: Stream all intermediate frames into memory rapidly
     for (var i = 0; i < this.totalFrames; i++) {
-      if (keyframes.indexOf(i) === -1) {
+      if (anchors.indexOf(i) === -1) {
         (function (idx) {
           setTimeout(function () {
             self.preloadSingle(idx);
-          }, idx * 6);
+          }, idx * 8);
         })(i);
       }
     }
+  };
+
+  CanvasScrubber.prototype.ensureLoaded = function () {
+    this.preloadAll();
   };
 
   CanvasScrubber.prototype.preloadSingle = function (idx) {
@@ -164,8 +155,11 @@
       self.loaded[idx] = true;
       if (idx === 0 && self.lastDrawn === -1) {
         self.draw(0);
-      } else if (Math.round(self.currentProgress * (self.totalFrames - 1)) === idx) {
-        self.draw(idx);
+      } else if (self.isVisible) {
+        var currentFrame = Math.min(Math.floor(self.currentProgress * self.totalFrames), self.totalFrames - 1);
+        if (Math.abs(currentFrame - idx) <= 2) {
+          self.draw(currentFrame);
+        }
       }
     };
     this.images[idx] = img;
@@ -208,21 +202,22 @@
   CanvasScrubber.prototype.draw = function (frameIndex) {
     var img = this.images[frameIndex];
     if (!img || !this.loaded[frameIndex]) {
-      // If we already have a valid frame drawn on canvas, HOLD IT until new frame arrives
-      // This eliminates frame jumping, stuttering, and flickering during scroll
-      if (this.lastDrawn >= 0 && this.loaded[this.lastDrawn]) {
-        return;
-      }
-      // If first initial paint, find nearest loaded frame
+      // Find nearest loaded frame so the video ALWAYS advances smoothly with scroll
+      var best = null;
       for (var d = 1; d < this.totalFrames; d++) {
         if (frameIndex - d >= 0 && this.loaded[frameIndex - d]) {
-          img = this.images[frameIndex - d];
+          best = this.images[frameIndex - d];
           break;
         }
         if (frameIndex + d < this.totalFrames && this.loaded[frameIndex + d]) {
-          img = this.images[frameIndex + d];
+          best = this.images[frameIndex + d];
           break;
         }
+      }
+      if (best) {
+        img = best;
+      } else if (this.lastDrawn >= 0 && this.images[this.lastDrawn] && this.loaded[this.lastDrawn]) {
+        img = this.images[this.lastDrawn];
       }
     }
     if (!img) return;
