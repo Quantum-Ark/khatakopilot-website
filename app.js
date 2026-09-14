@@ -114,39 +114,42 @@
 
   CanvasScrubber.prototype.getFrameUrl = function (index) {
     var num = String(index + 1).padStart(3, "0");
-    return "assets/frames/" + this.folder + "/ezgif-frame-" + num + ".png";
+    return "assets/frames/" + this.folder + "/ezgif-frame-" + num + ".webp";
   };
 
   CanvasScrubber.prototype.init = function () {
     var self = this;
-    // Priority preloading: Key frames loaded first for instantaneous visual paint
-    var priority = [0, 12, 24, 36, 49];
-    priority.forEach(function (idx) {
-      self.preloadSingle(idx);
-    });
+    this.hasStartedFullPreload = false;
 
-    // Progressive secondary preload of all other frames in idle slices
-    if ("requestIdleCallback" in window) {
-      window.requestIdleCallback(function () {
-        self.preloadRemaining(priority);
-      });
-    } else {
-      setTimeout(function () {
-        self.preloadRemaining(priority);
-      }, 400);
+    // Preload key anchor frame 0 immediately
+    this.preloadSingle(0);
+
+    // Chapter 1 is the immediate hero visible on arrival: preload all its frames right away
+    if (this.folder === "1") {
+      this.ensureLoaded();
     }
 
     this.resize();
   };
 
-  CanvasScrubber.prototype.preloadRemaining = function (priorityList) {
+  CanvasScrubber.prototype.ensureLoaded = function () {
+    if (this.hasStartedFullPreload) return;
+    this.hasStartedFullPreload = true;
     var self = this;
+
+    // Load keyframe anchors first (0, 12, 25, 37, 49) for instant coverage
+    var keyframes = [0, 12, 25, 37, 49];
+    keyframes.forEach(function (idx) {
+      self.preloadSingle(idx);
+    });
+
+    // Stream all remaining frames rapidly into memory
     for (var i = 0; i < this.totalFrames; i++) {
-      if (priorityList.indexOf(i) === -1) {
+      if (keyframes.indexOf(i) === -1) {
         (function (idx) {
           setTimeout(function () {
             self.preloadSingle(idx);
-          }, idx * 12);
+          }, idx * 6);
         })(i);
       }
     }
@@ -205,7 +208,12 @@
   CanvasScrubber.prototype.draw = function (frameIndex) {
     var img = this.images[frameIndex];
     if (!img || !this.loaded[frameIndex]) {
-      // Nearest loaded fallback frame
+      // If we already have a valid frame drawn on canvas, HOLD IT until new frame arrives
+      // This eliminates frame jumping, stuttering, and flickering during scroll
+      if (this.lastDrawn >= 0 && this.loaded[this.lastDrawn]) {
+        return;
+      }
+      // If first initial paint, find nearest loaded frame
       for (var d = 1; d < this.totalFrames; d++) {
         if (frameIndex - d >= 0 && this.loaded[frameIndex - d]) {
           img = this.images[frameIndex - d];
@@ -346,6 +354,7 @@
         var isNearViewport = relBottom >= -window.innerHeight * 0.5 && relTop <= window.innerHeight * 1.5;
         t.scrubber.isVisible = isNearViewport;
         if (isNearViewport) {
+          t.scrubber.ensureLoaded();
           t.scrubber.setProgress(localProgress);
         }
       }
