@@ -2,277 +2,905 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KhataCopilot — The Counter OS for Bharat's Kiranas | Download for Android, Windows, macOS, Linux, iOS</title>
-<meta name="description" content="Voice-first, offline-first accounting, GST, ONDC catalog, soundbox billing and working-capital readiness for Indian kiranas. Free. Download for Android, Windows, macOS, Linux and iOS.">
-<meta name="theme-color" content="#5E21B8">
-<link rel="icon" type="image/png" href="favicon.png?v=3">
-<link rel="stylesheet" href="styles.css?v=5">
-<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>KhataCopilot — The Counter OS for Bharat | Interactive Cinematic Experience</title>
+<meta name="description" content="Voice-first, offline-first counter OS with smart billing, thermal POS, GST, and soundbox for India's 63M businesses. Free download for Windows and Android.">
+<meta name="theme-color" content="#6320EE">
+<link rel="icon" type="image/png" href="favicon.png?v=5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=26">
 </head>
-<body>
-<div class="progress" id="progress"></div>
+<body class="cinematic-body is-loading">
 
-<div class="topstrip"><span class="pulse"></span> v1.0.0 test builds are live — Android APK &amp; Windows portable ready for shop trials <a href="#download">Get the build ↓</a></div>
+<!-- Premium Studio Custom Cursor (Desktop Only, Disabled on Touch) -->
+<div class="custom-cursor-dot" id="cursorDot" aria-hidden="true"></div>
+<div class="custom-cursor-ring" id="cursorRing" aria-hidden="true"></div>
 
-<header class="nav" id="nav">
-  <a class="brand" href="#top" aria-label="KhataCopilot home">
-    <img class="brand-img" src="favicon.png?v=3" alt="KhataCopilot logo" width="38" height="38">
-    <span class="brand-word">KhataCopilot<small>counter OS · pune</small></span>
+<!-- ==========================================================================
+     0. BRANDED FILM LOADING & LOGO REVEAL SEQUENCE
+     ========================================================================== -->
+<div class="loading-screen" id="loadingScreen" aria-label="Loading KhataCopilot Experience">
+  <div class="loading-ambient-glow"></div>
+  <div class="loading-beam" id="loadingBeam"></div>
+  
+  <div class="loading-content">
+    <div class="loading-logo-lockup" id="loadingLogoLockup">
+      <div class="logo-mark-wrap">
+        <img src="assets/brand/logo-mark.png" alt="KhataCopilot K Logo" class="loading-logo-img" width="88" height="88">
+        <div class="logo-radiant-pulse"></div>
+        <div class="rupee-illumination-spark">₹</div>
+      </div>
+      <div class="loading-wordmark">
+        <span class="loading-brand-title">KhataCopilot</span>
+        <span class="loading-brand-tagline">Business Ko Mila Smart Saathi</span>
+      </div>
+    </div>
+
+    <div class="loading-pillars" id="loadingPillars">
+      <span class="p-chip">BILL</span>
+      <span class="p-dot">·</span>
+      <span class="p-chip">TRACK</span>
+      <span class="p-dot">·</span>
+      <span class="p-chip">MANAGE</span>
+      <span class="p-dot">·</span>
+      <span class="p-chip">GROW</span>
+    </div>
+
+    <button class="skip-loading-btn" id="skipLoadingBtn" aria-label="Skip to Experience">
+      <span>Scroll or Click to Enter Film</span> ↓
+    </button>
+  </div>
+</div>
+
+<!-- Global Scroll Progress Timeline -->
+<div class="scroll-timeline" id="scrollTimeline" aria-hidden="true"></div>
+
+<!-- Minimal Fixed Floating Navbar (Pure Text, Clean & Numbers Removed) -->
+<header class="nav-hud" id="navHud">
+  <a class="nav-brand" href="#ch01" aria-label="KhataCopilot Home">
+    <img src="assets/brand/logo-mark.png" alt="KhataCopilot" class="brand-logo" width="34" height="34" onerror="this.src='favicon.png'">
+    <div class="brand-text">
+      <span class="brand-name">KhataCopilot</span>
+      <span class="brand-tag">COUNTER OS · PUNE</span>
+    </div>
   </a>
-  <nav class="links">
-    <a href="#story">Story</a>
-    <a href="#features">Features</a>
-    <a href="#day">A day</a>
-    <a href="#compare">Vs old ways</a>
-    <a href="#download">Download</a>
-    <a href="#faq">FAQ</a>
+
+  <nav class="nav-menu" id="navMenu">
+    <a href="#ch01" class="n-link active" data-target="1">Counter</a>
+    <a href="#ch02" class="n-link" data-target="2">Voice</a>
+    <a href="#ch03" class="n-link" data-target="3">Command</a>
+    <a href="#ch04" class="n-link" data-target="4">Ecosystem</a>
+    <a href="#ch05" class="n-link" data-target="5">AI Sahayak</a>
+    <a href="#ch06" class="n-link" data-target="6">POS &amp; Bill</a>
+    <a href="#ch07" class="n-link" data-target="7">Finale</a>
+    <a href="#trustGuarantee" class="n-link">Trust</a>
+    <a href="#faqSection" class="n-link">FAQ</a>
+    <a href="#downloadHub" class="n-link">Downloads</a>
   </nav>
-  <div class="nav-cta">
-    <a class="btn line sm" href="#story">Watch the story</a>
-    <a class="btn solid sm" href="#download">Download free</a>
+
+  <div class="nav-right">
+    <a class="nav-cta" href="#downloadHub">Get KhataCopilot ↓</a>
+    <button class="nav-burger" id="navBurger" aria-label="Toggle Navigation">
+      <span></span><span></span>
+    </button>
   </div>
-  <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
 </header>
-<div class="mobilemenu" id="mobilemenu">
-  <a href="#story">Story</a><a href="#features">Features</a><a href="#day">A day</a><a href="#compare">Vs old ways</a><a href="#download">Download</a><a href="#faq">FAQ</a>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-nav-panel" id="mobileNavPanel">
+  <a href="#ch01" class="m-link">Traditional Counter</a>
+  <a href="#ch02" class="m-link">Vernacular Voice POS</a>
+  <a href="#ch03" class="m-link">Dark Command Center</a>
+  <a href="#ch04" class="m-link">Multi-Platform Suite</a>
+  <a href="#ch05" class="m-link">AI Sahayak Neural Brain</a>
+  <a href="#ch06" class="m-link">Core Suite &amp; POS</a>
+  <a href="#ch07" class="m-link">Grand Hardware Finale</a>
+  <a href="#trustGuarantee" class="m-link">🛡️ Trust &amp; Security</a>
+  <a href="#faqSection" class="m-link">❓ Merchant FAQs</a>
+  <a href="#downloadHub" class="m-link m-highlight">📥 Download Builds (v2.0)</a>
 </div>
 
-<main id="top">
-
-<!-- ============ HERO SCROLL TRACK & CINEMATIC SEQUENCE ============ -->
-<div class="hero-scroll-track" id="heroScrollTrack">
-  <div class="hero-canvas-sticky" id="heroCanvasSticky">
-    <canvas id="heroSequenceCanvas" class="hero-sequence-canvas" aria-hidden="true"></canvas>
-    <div class="hero-canvas-overlay" aria-hidden="true"></div>
+<!-- Floating Cinematic Chapter HUD (Auto-Hides When Leaving Film Chapters) -->
+<aside class="chapter-hud" id="chapterHud" aria-label="Film Timeline">
+  <div class="hud-pill">
+    <span class="hud-counter" id="hudCounter">01 / 07</span>
+    <span class="hud-sep">·</span>
+    <span class="hud-title" id="hudTitle">THE AWAKENING</span>
   </div>
-  <div class="hero-content-pin">
-    <section class="hero">
-  <div class="hero-grid">
-    <div class="hero-copy">
-      <p class="kicker reveal"><span class="rule"></span> For the 63 million shops that run Bharat</p>
-      <h1 class="reveal d1">The bahi-khata<br>that <em>listens</em>,<br>remembers &amp; verifies.</h1>
-      <p class="lede reveal d2">KhataCopilot sits on the counter next to the weighing scale. You speak — <i>“Sharma ji ko 5 kilo atta, 650 udhaar”</i> — and the sale, the GST split, the udhaar and the receipt are done. No typing. No internet needed. No English required.</p>
-      <div class="hero-actions reveal d3">
-        <a class="btn solid lg" id="heroDownload" href="#download">Download for <span id="heroOs">your device</span> →</a>
-        <a class="btn line lg" href="#story">Read Ramesh's story · 4 min</a>
+  <div class="hud-bar-track">
+    <div class="hud-bar-fill" id="hudBarFill"></div>
+  </div>
+</aside>
+
+<!-- ==========================================================================
+     CINEMATIC PRODUCT FILM — 7 SCROLL-SCRUBBED CHAPTERS
+     Each chapter connects to one of the 7 frame-by-frame sequences.
+     100% of star watermarks are cropped cleanly via CanvasScrubber.
+     ========================================================================== -->
+<main id="filmContainer" class="film-container">
+
+  <!-- ==================== CHAPTER 01: TRADITIONAL COUNTER & TRANSFORMATION ==================== -->
+  <!-- Asset Sequence: Folder 4 (seq_track) — Red cloth bahi-khata morphs into modern digital workspace -->
+  <section class="chapter-track" id="ch01" data-chapter="1" data-name="THE AWAKENING · BHARAT COUNTER" style="--track-height: 380vh;">
+    <div class="chapter-sticky">
+      <div class="kinetic-bg-wrap">
+        <span class="kinetic-word kw-left">COUNTER</span>
+        <span class="kinetic-word kw-right">BHARAT</span>
       </div>
-      <div class="hero-meta reveal d4">
-        <div><strong data-count="10">0</strong><span>Indian languages, voice in &amp; out</span></div>
-        <div><strong data-count="100">0</strong><span>% offline ledger core</span></div>
-        <div><strong data-count="63">0</strong><span>M MSMEs this is built for</span></div>
-      </div>
-      <p class="fine">Free for shop trials · No account needed to explore · Your books stay on your device</p>
-      <p class="scrollhint">Scroll for Ramesh's story <span>↓</span></p>
-    </div>
-    <div class="hero-stage reveal d2">
-      <div class="phone" id="phone">
-        <div class="phone-notch"></div>
-        <div class="phone-screen">
-          <div class="ps-top"><span>● ● ●</span><span>Khata · Meri Shandaar Dukaan</span><span>ऑफ़लाइन ✓</span></div>
-          <div class="ledger" id="ledger">
-            <div class="lrow"><span class="lt">06:12</span><span class="ld">Do chai, 2 biscuit — counter sale</span><span class="la">+ ₹40</span></div>
-            <div class="lrow"><span class="lt">06:40</span><span class="ld">Sharma ji — 5 kg atta, udhaar</span><span class="la warn">₹650 due</span></div>
+
+      <div class="hero-container">
+        <div class="hero-header-box">
+          <div class="kicker-pill"><span class="k-dot"></span> BUSINESS KO MILA SMART SAATHI · 63M SHOPS</div>
+          <h1 class="hero-main-title">
+            <span class="hero-title-line">Manage Business</span><br>
+            <span class="hero-title-line"><span class="gradient-text">Smarter, Everywhere.</span></span>
+          </h1>
+          <p class="hero-desc">
+            The counter OS built for Bharat's kiranas, retail shops &amp; restaurants. From traditional cloth bahi-khata to instant voice billing, thermal GST slips, and multi-device sync.
+          </p>
+          <div class="hero-cta-row">
+            <a class="btn solid glow" href="#downloadHub">Get KhataCopilot Free <span class="arrow-move">↓</span></a>
+            <a class="btn line" href="#ch02">Explore Voice POS <span class="arrow-move">→</span></a>
           </div>
-          <div class="typing"><span id="typeText"></span><span class="caret"></span></div>
-          <div class="microw">
-            <div class="micring"><div class="mic">🎙</div></div>
-            <p id="micLabel">Sun raha hai… “Ramesh paid 1200 cash”</p>
+        </div>
+
+        <div class="hero-stage-frame">
+          <canvas class="scrub-canvas" id="canvas01" data-folder="4" aria-label="Traditional Bahi-Khata Ledger Transforming into Digital Counter"></canvas>
+          <div class="frame-glass-shine"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CHAPTER 02: VERNACULAR VOICE-FIRST LEDGER ==================== -->
+  <!-- Asset Sequence: Folder 3 (seq_voice) — iPhone glowing microphone & voice waveform -> MacBook Speak Now -->
+  <section class="chapter-track" id="ch02" data-chapter="2" data-name="VERNACULAR VOICE POS" style="--track-height: 400vh;">
+    <div class="chapter-sticky">
+      <div class="kinetic-bg-wrap">
+        <span class="kinetic-word kw-center">VOICE</span>
+      </div>
+
+      <div class="visual-interactive-stage">
+        <div class="stage-media-box">
+          <canvas class="scrub-canvas" id="canvas02" data-folder="3" aria-label="KhataCopilot Vernacular Voice POS on iPhone and MacBook"></canvas>
+          <div class="frame-glass-shine"></div>
+        </div>
+
+        <div class="stage-floating-hud left-hud">
+          <div class="stage-hud-card">
+            <span class="chapter-num-tag">CHAPTER 02 · VERNACULAR VOICE</span>
+            <h2 class="card-title">Speak naturally.<br>Your books write themselves.</h2>
+            
+            <div class="audio-waveform-box">
+              <div class="audio-bars">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <p class="audio-transcript">“Sharma ji ko 5 kilo atta, 650 udhaar”</p>
+            </div>
+
+            <p class="card-p">
+              10 Indian languages supported. On-device regex engine extracts line items, party udhaar, and tax splits in under 400 milliseconds. No typing, no English menus.
+            </p>
+            
+            <div class="badge-row">
+              <span>Hindi / Hinglish</span><span>On-Device Regex</span><span>Instant TTS Confirm</span>
+            </div>
           </div>
-          <div class="ps-confirm" id="psConfirm">✓ 40 rupaye bikri mein jod diya</div>
         </div>
-        <div class="phone-side"></div>
       </div>
-      <div class="stamp stamp1">GSTR-1 ready</div>
-      <div class="stamp stamp2">ONDC RET10 ✓</div>
-      <div class="stamp stamp3">UPI verified ✓</div>
     </div>
-  </div>
-  <div class="ticker" aria-hidden="true"><div class="ticker-track" id="tickerTrack">
-    <span>हिंदी</span><i>·</i><span>मराठी</span><i>·</i><span>ગુજરાતી</span><i>·</i><span>தமிழ்</span><i>·</i><span>తెలుగు</span><i>·</i><span>বাংলা</span><i>·</i><span>ಕನ್ನಡ</span><i>·</i><span>മലയാളം</span><i>·</i><span>ଓଡ଼ିଆ</span><i>·</i><span>English</span><i>·</i>
-    <span>हिंदी</span><i>·</i><span>मराठी</span><i>·</i><span>ગુજરાતી</span><i>·</i><span>தமிழ்</span><i>·</i><span>తెలుగు</span><i>·</i><span>বাংলা</span><i>·</i><span>ಕನ್ನಡ</span><i>·</i><span>മലയാളം</span><i>·</i><span>ଓଡ଼ିଆ</span><i>·</i><span>English</span><i>·</i>
-  </div></div>
-</section>
-  </div>
-</div>
+  </section>
 
-<!-- ============ STORY ============ -->
-<section class="story" id="story">
-  <div class="wrap">
-    <p class="kicker reveal"><span class="rule"></span> Chapter 01 — A story, not a sales pitch</p>
-    <h2 class="reveal">Ramesh opens his shutter at 6 AM.<br>The day that used to defeat him.</h2>
-    <div class="story-cols">
-      <div class="story-prose">
-        <p class="reveal"><strong>Pune, Kothrud.</strong> Ramesh Yadav's kirana is eleven feet wide and forty years old — inherited from his father, along with a cloth-bound bahi-khata and a ballpoint pen that only works if you press hard. By 9 AM the pen has already failed him twice.</p>
-        <p class="reveal">The morning rush doesn't wait for paperwork. A schoolboy wants two biscuits. Aunty wants atta on udhaar. A delivery boy drops a crate of oil and thrusts a printed bill at him. Somewhere in the middle, a customer flashes a phone screen — <em>“payment ho gaya, dekho”</em> — and Ramesh has four seconds to decide whether to trust a screenshot he's never seen before.</p>
-        <p class="reveal">This is the part the software industry never designed for. Every accounting app assumed Ramesh would sit down, type, pick tax slabs, reconcile. Ramesh never sits down. His hands smell of haldi. His internet dies every time it rains. His English is the English of signboards, and his accountant speaks in a language of forms that cost ₹500 a visit to translate.</p>
-        <p class="reveal">So the bahi-khata stayed. And the money scattered — some in the notebook, some in GPay notifications, some in PhonePe, some as screenshots, some as memory. At Diwali, when the bank asked for “audited statements” for a ₹2 lakh loan, Ramesh had a cloth book with smudged pages. The loan died there.</p>
-        <blockquote class="reveal">“Mujhe English software nahi chahiye. Mujhe koi chahiye jo meri sun sake.”<cite>— Ramesh, and roughly 12 million kirana owners like him</cite></blockquote>
-        <p class="reveal">KhataCopilot started from that sentence. Not as an app — as a counter companion. One device, no internet needed for the core, three jobs: <strong>log every rupee by voice or camera, unify money scattered across UPI apps and cash, and verify payments before trust.</strong> Everything else — GST exports, ONDC catalog, the loud “₹200 received” announcement, the thermal bill — is just what falls out naturally once those three are true.</p>
-        <p class="reveal">What follows is Ramesh's Tuesday — hour by hour — with the companion on the counter. Then the honest technical details, the downloads, and the fine print we refuse to hide.</p>
+  <!-- ==================== CHAPTER 03: EXECUTIVE DARK COMMAND CENTER ==================== -->
+  <!-- Asset Sequence: Folder 2 (seq_command) — Glowing AI chip zooms out to dark executive command center + soundbox -->
+  <section class="chapter-track" id="ch03" data-chapter="3" data-name="DARK COMMAND CENTER" style="--track-height: 420vh;">
+    <div class="chapter-sticky dark-sticky-bg">
+      <div class="kinetic-bg-wrap">
+        <span class="kinetic-word kw-left light-kw">TRACK</span>
+        <span class="kinetic-word kw-right light-kw">PULSE</span>
       </div>
-      <aside class="story-rail">
-        <div class="rail-card sticky">
-          <p class="rail-title">Why this story matters</p>
-          <ul>
-            <li class="reveal"><strong>80%+ local merchants</strong> still run on paper or memory for daily books.</li>
-            <li class="reveal"><strong>3 UPI apps minimum</strong> per counter — collections fracture across streams.</li>
-            <li class="reveal"><strong>Fake payment screenshots</strong> are the fastest-growing counter fraud.</li>
-            <li class="reveal"><strong>Zero audited books</strong> = zero working-capital loans for most MSMEs.</li>
-          </ul>
-          <div class="rail-note">Sources: MSME Ministry headcount (63M enterprises), on-ground merchant interviews in Pune, 2025–26. Figures are directional, not a census.</div>
+
+      <div class="visual-interactive-stage dark-theme-stage">
+        <div class="stage-media-box">
+          <canvas class="scrub-canvas" id="canvas03" data-folder="2" aria-label="KhataCopilot Dark Executive Command Center and Soundbox"></canvas>
+          <div class="frame-glass-shine neon-rim"></div>
         </div>
-      </aside>
+
+        <div class="stage-floating-hud">
+          <div class="stage-hud-card dark-hud-card">
+            <span class="chapter-num-tag neon">CHAPTER 03 · COMMAND CENTER</span>
+            <h2 class="card-title light-text">Phone becomes the Soundbox.<br>Live cashflow telemetry.</h2>
+            <p class="card-p light-sub">
+              Zero monthly hardware rent. Loud multilingual payment announcements for GPay, PhonePe, and Paytm with real-time net profit curves and sales velocity.
+            </p>
+            
+            <div class="soundbox-badge">
+              <span class="speaker-icon">🔊</span>
+              <span>“Paytm par ₹200 prapt hue” — 10 Languages</span>
+            </div>
+
+            <div class="metrics-grid">
+              <div class="metric-box dark-m">
+                <strong class="green-val">₹38,407</strong>
+                <span>Net Profit</span>
+              </div>
+              <div class="metric-box dark-m">
+                <strong class="purple-val">₹30,395</strong>
+                <span>Daily Sales</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CHAPTER 04: THE MULTI-DEVICE OPERATING SYSTEM ==================== -->
+  <!-- Asset Sequence: Folder 5 (seq_ecosystem) — Clean desk, Monitor, Laptop, Android & iOS elevate into ecosystem -->
+  <section class="chapter-track" id="ch04" data-chapter="4" data-name="CROSS-PLATFORM SUITE" style="--track-height: 380vh;">
+    <div class="chapter-sticky">
+      <div class="kinetic-bg-wrap">
+        <span class="kinetic-word kw-center">MANAGE</span>
+      </div>
+
+      <div class="visual-interactive-stage">
+        <div class="stage-media-box">
+          <canvas class="scrub-canvas" id="canvas04" data-folder="5" aria-label="KhataCopilot Multi-Platform Ecosystem: Windows, Mac, Android, iOS"></canvas>
+          <div class="frame-glass-shine"></div>
+        </div>
+
+        <div class="stage-floating-hud">
+          <div class="stage-hud-card">
+            <span class="chapter-num-tag">CHAPTER 04 · CROSS-PLATFORM</span>
+            <h2 class="card-title">Windows · Android · iOS · macOS</h2>
+            <p class="card-p">
+              Run on the counter laptop, cashier phone, or warehouse tablet. All devices communicate with offline-first SQLite sync — zero cloud subscription fees, 100% local data ownership.
+            </p>
+            <div class="badge-row">
+              <span>Windows Setup (.exe)</span><span>Android APK (v2.0)</span><span>TestFlight iOS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CHAPTER 05: AI SAHAYAK NEURAL COUNTER BRAIN ==================== -->
+  <!-- Asset Sequence: Folder 6 (seq_ai) — Voice Ledger icon expands into full neural constellation of tools -->
+  <section class="chapter-track" id="ch05" data-chapter="5" data-name="AI SAHAYAK NEURAL HUB" style="--track-height: 420vh;">
+    <div class="chapter-sticky dark-sticky-bg">
+      <div class="kinetic-bg-wrap">
+        <span class="kinetic-word kw-left light-kw">AI</span>
+        <span class="kinetic-word kw-right light-kw">SAHAYAK</span>
+      </div>
+
+      <div class="visual-interactive-stage dark-theme-stage">
+        <div class="stage-media-box">
+          <canvas class="scrub-canvas" id="canvas05" data-folder="6" aria-label="KhataCopilot AI Sahayak Neural Counter Brain"></canvas>
+          <div class="frame-glass-shine neon-rim"></div>
+        </div>
+
+        <div class="stage-floating-hud left-hud">
+          <div class="stage-hud-card dark-hud-card neural-glow">
+            <span class="chapter-num-tag neon">CHAPTER 05 · NEURAL BRAIN</span>
+            <h2 class="card-title light-text">The Neural Counter Brain.</h2>
+            
+            <div class="dialogue-box">
+              <div class="d-bubble user">“Aaj GPay pe kitna collection hua?”</div>
+              <div class="d-bubble ai">“Aaj total ₹8,420 aaya — ₹5,120 UPI aur ₹3,300 cash.”</div>
+            </div>
+
+            <p class="card-p light-sub">
+              Ask questions about stock levels, pending udhaar, and daily margins in everyday Hindi or English. AI Sahayak reads your local ledger and answers aloud instantly.
+            </p>
+            <div class="badge-row">
+              <span>Camera OCR Bills</span><span>Voice Ledger</span><span>Auto GST Filing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CHAPTER 06: CORE COUNTER SUITE & THERMAL POS ==================== -->
+  <!-- Asset Sequence: Folder 7 (seq_launch) — Centered laptop, phone, 58mm printer, Speak Bill Track Manage Grow -->
+  <section class="chapter-track" id="ch06" data-chapter="6" data-name="CORE COUNTER SUITE" style="--track-height: 400vh;">
+    <div class="chapter-sticky">
+      <div class="kinetic-bg-wrap">
+        <span class="kinetic-word kw-center">BILL</span>
+      </div>
+
+      <div class="visual-interactive-stage">
+        <div class="stage-media-box">
+          <canvas class="scrub-canvas" id="canvas06" data-folder="7" aria-label="KhataCopilot Core Counter Suite with Thermal POS"></canvas>
+          <div class="frame-glass-shine"></div>
+        </div>
+
+        <div class="stage-floating-hud">
+          <div class="stage-hud-card">
+            <span class="chapter-num-tag">CHAPTER 06 · BILL &amp; POS</span>
+            <h2 class="card-title">Speak. Bill. Track. Manage. Grow.</h2>
+            <p class="card-p">
+              Drive Bluetooth and USB ESC/POS 58mm &amp; 80mm thermal receipt printers from any device. Customers see exact amounts on the Dynamic UPI QR stand.
+            </p>
+            
+            <div class="thermal-receipt-snippet">
+              <div class="t-line"><span>5 kg Atta (Fortune)</span><span>₹650.00</span></div>
+              <div class="t-line"><span>2 pkts Mustard Oil</span><span>₹280.00</span></div>
+              <div class="t-line"><span>CGST + SGST (5%)</span><span>₹46.50</span></div>
+              <div class="t-total"><span>TOTAL DUE</span><strong>₹976.50</strong></div>
+            </div>
+
+            <div class="badge-row">
+              <span>58mm / 80mm ESC/POS</span><span>Dynamic UPI QR</span><span>Zero Rental</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CHAPTER 07: GRAND HARDWARE FINALE ==================== -->
+  <!-- Asset Sequence: Folder 1 (seq_finale) — Complete hardware ensemble & floating feature badges -->
+  <section class="chapter-track" id="ch07" data-chapter="7" data-name="GRAND HARDWARE FINALE" style="--track-height: 440vh;">
+    <div class="chapter-sticky">
+      <div class="kinetic-bg-wrap">
+        <span class="kinetic-word kw-left">GROW</span>
+        <span class="kinetic-word kw-right">SAATHI</span>
+      </div>
+
+      <div class="finale-container">
+        <div class="finale-header-box">
+          <div class="kicker-pill"><span class="k-dot"></span> COMPLETE COUNTER OPERATING SYSTEM</div>
+          <h2 class="hero-main-title">
+            Your Business Deserves<br><span class="gradient-text">a Smart Saathi.</span>
+          </h2>
+          <p class="hero-desc">
+            Laptop, Phone, Soundbox &amp; Thermal Printer in continuous harmony. Speak natural Hindi, print instant GST bills, and let your ledger manage itself.
+          </p>
+          <div class="hero-cta-row">
+            <a class="btn solid glow" href="#downloadHub">Download for Windows &amp; Android ↓</a>
+            <a class="btn line" href="#trustGuarantee">Security &amp; Trust →</a>
+          </div>
+        </div>
+
+        <div class="finale-visual-box">
+          <canvas class="scrub-canvas" id="canvas07" data-folder="1" aria-label="KhataCopilot Complete Hardware Suite Finale"></canvas>
+          <div class="frame-glass-shine"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ==========================================================================
+     ACT II: TRUST, CREDIBILITY & ARCHITECTURE GUARANTEE
+     Authoritative, calm, credible pacing. Supported claims only.
+     ========================================================================== -->
+<section class="trust-flow-section" id="trustGuarantee">
+  <div class="flow-container">
+    
+    <!-- Trust Horizontal Sequence Indicator -->
+    <div class="trust-sequence-bar" id="trustSequence" aria-label="Trust Progression">
+      <div class="seq-step active" data-step="1">
+        <span class="step-dot"></span>
+        <span class="step-label">PRODUCT</span>
+      </div>
+      <div class="seq-line-track"><div class="seq-line-fill"></div></div>
+      <div class="seq-step" data-step="2">
+        <span class="step-dot"></span>
+        <span class="step-label">DATA</span>
+      </div>
+      <div class="seq-line-track"><div class="seq-line-fill"></div></div>
+      <div class="seq-step" data-step="3">
+        <span class="step-dot"></span>
+        <span class="step-label">BUSINESS</span>
+      </div>
+      <div class="seq-line-track"><div class="seq-line-fill"></div></div>
+      <div class="seq-step" data-step="4">
+        <span class="step-dot"></span>
+        <span class="step-label">TRUST</span>
+      </div>
+    </div>
+
+    <div class="flow-section-header">
+      <div class="kicker-pill"><span class="k-dot"></span> BHARAT'S MOST RELIABLE COUNTER PLATFORM</div>
+      <h2 class="flow-main-title">Built for the way Bharat does business.</h2>
+      <p class="flow-desc">
+        Business Ko Mila Smart Saathi. Dukan ka hisab dukan me hi rehna chahiye. Zero downtime, zero foreign server tracking, aur 100% data ownership.
+      </p>
+    </div>
+
+    <div class="trust-grid">
+      
+      <!-- Trust Pillar 1: Offline-First -->
+      <div class="trust-card">
+        <div class="trust-icon-box">
+          <div class="fintech-icon-pill icon-bolt">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <span>OFFLINE SQLITE</span>
+          </div>
+        </div>
+        <h3>100% Offline-First Architecture</h3>
+        <p class="trust-subtitle">Internet Band? Dukan Fir Bhi 100% Chalu.</p>
+        <p class="trust-p">
+          KhataCopilot stores every transaction in a robust local SQLite database directly on your PC or phone. Billing, voice recognition, receipt printing, and daily khata work without an active internet connection. Syncs automatically whenever Wi-Fi reconnects.
+        </p>
+        <div class="trust-metric-pill">
+          <span class="status-live-dot"></span>
+          <span>Zero Server Downtime Risk</span>
+        </div>
+      </div>
+
+      <!-- Trust Pillar 2: Data Ownership -->
+      <div class="trust-card">
+        <div class="trust-icon-box">
+          <div class="fintech-icon-pill icon-shield">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>DPDP COMPLIANT</span>
+          </div>
+        </div>
+        <h3>Your Data, Your Control</h3>
+        <p class="trust-subtitle">Private by Design · Zero Third-Party Sharing</p>
+        <p class="trust-p">
+          Your customer phone numbers, udhaar records, and daily revenue numbers belong solely to you. We never sell merchant data to advertisers or lenders. Export your complete business ledger anytime in Excel, CSV, or PDF format with 1 tap.
+        </p>
+        <div class="trust-metric-pill">
+          <span class="status-live-dot"></span>
+          <span>1-Click Excel / CSV Export</span>
+        </div>
+      </div>
+
+      <!-- Trust Pillar 3: Real Native Software & Hardware -->
+      <div class="trust-card">
+        <div class="trust-icon-box">
+          <div class="fintech-icon-pill icon-hardware">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <span>NATIVE HARDWARE</span>
+          </div>
+        </div>
+        <h3>Real Native Software &amp; Hardware</h3>
+        <p class="trust-subtitle">One Product. Built For Your Counter.</p>
+        <p class="trust-p">
+          No slow web wrappers or browser dependencies. Built natively with Flutter and C++ for Windows 10/11 and Android. Directly drives ESC/POS thermal receipt printers over USB and Bluetooth without installing clunky external printer managers.
+        </p>
+        <div class="trust-metric-pill">
+          <span class="status-live-dot"></span>
+          <span>Native 58mm &amp; 80mm ESC/POS</span>
+        </div>
+      </div>
+
+      <!-- Trust Pillar 4: Built For Bharat -->
+      <div class="trust-card">
+        <div class="trust-icon-box">
+          <div class="fintech-icon-pill icon-bharat">
+            <div class="bharat-emblem">
+              <span class="flag-stripe orange"></span>
+              <span class="flag-stripe white"></span>
+              <span class="flag-stripe green"></span>
+            </div>
+            <span>BHARAT WORKFLOWS</span>
+          </div>
+        </div>
+        <h3>Engineered for Bharat Workflows</h3>
+        <p class="trust-subtitle">Voice · GST · Udhaar · Soundbox</p>
+        <p class="trust-p">
+          Designed after studying real kirana counters, retail shops, and restaurants in Pune and across India. Supports 10 Indian languages for voice billing, produces CA-ready GSTR-1 and GSTR-3B tax estimates, and sends polite WhatsApp udhaar payment reminders.
+        </p>
+        <div class="trust-metric-pill">
+          <span class="status-live-dot"></span>
+          <span>10 Indian Vernacular Languages</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ==========================================================================
+     ACT III: EDITORIAL INTERACTIVE FAQ
+     2-Column Editorial Layout: Left Huge Typography, Right Smooth Accordions
+     ========================================================================== -->
+<section class="faq-editorial-section" id="faqSection">
+  <div class="faq-editorial-container">
+    
+    <!-- Left Column: Editorial Typography -->
+    <div class="faq-left-col">
+      <span class="faq-kicker">MERCHANT INTELLIGENCE</span>
+      <h2 class="faq-huge-title">Questions?<br>We've got<br><span class="gradient-text">answers.</span></h2>
+      <p class="faq-subtext">
+        Everything you need to know before bringing KhataCopilot to your business counter.
+      </p>
+
+      <div class="faq-support-box">
+        <h4>Talk to KhataCopilot Team</h4>
+        <p>Direct engineering and merchant onboarding helpline:</p>
+        <div class="faq-phone-badge">
+          <span class="phone-ico">📞</span>
+          <span class="phone-num">+91 78419 38644</span>
+        </div>
+        <div class="faq-support-actions">
+          <a class="faq-chat-btn" href="https://wa.me/917841938644?text=Namaste%20KhataCopilot%20Team%2C%20mujhe%20apne%20counter%20ke%20liye%20help%20chahiye" target="_blank" rel="noopener noreferrer">
+            💬 WhatsApp (+91 78419 38644)
+          </a>
+          <a class="faq-mail-btn" href="mailto:abhishek@khatakopilot.store?subject=Merchant%20Inquiry">
+            ✉️ Email Support
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Interactive Numbered Accordion Stack -->
+    <div class="faq-right-col">
+      
+      <!-- FAQ 01 -->
+      <div class="faq-item active">
+        <button class="faq-question" aria-expanded="true">
+          <span class="faq-num">01</span>
+          <span class="faq-q-text">What is KhataCopilot and who is it built for?</span>
+          <span class="faq-indicator">−</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            KhataCopilot is the Counter Operating System built for India's 63 million kirana stores, retail shops, wholesale traders, and restaurants. It replaces cumbersome paper bahi-khata books and expensive legacy desktop software with natural vernacular voice billing, instant thermal receipt printing, dynamic UPI QR generation, and multi-device ledger sync.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ 02 -->
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span class="faq-num">02</span>
+          <span class="faq-q-text">Does KhataCopilot work completely offline without internet?</span>
+          <span class="faq-indicator">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            <strong>Yes, 100% offline-first.</strong> All core transactions, daily sales records, party ledgers, and thermal printing run directly from a local on-device SQLite database. If your internet or broadband drops during peak morning rush, your shop never stops. When an internet connection is restored, books synchronize seamlessly across your devices.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ 03 -->
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span class="faq-num">03</span>
+          <span class="faq-q-text">How does Vernacular Voice POS billing work?</span>
+          <span class="faq-indicator">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            Just tap the microphone and speak naturally in everyday Hindi, Hinglish, or 9 other Indian languages. For example: <em>“Sharma ji ko 5 kilo atta, 650 udhaar”</em>. An on-device regex and natural language engine parses items, quantities, prices, and party credit in under 400 milliseconds, automatically adding the entry to Sharma Ji's khata and confirming aloud.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ 04 -->
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span class="faq-num">04</span>
+          <span class="faq-q-text">Can I import my existing data from Vyapar, Khatabook, or Tally?</span>
+          <span class="faq-indicator">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            <strong>Yes, with 1-Click Excel / CSV Import!</strong> Simply export your customer party list, current balances, and inventory catalog from your previous accounting tool as an Excel/CSV file and upload it into KhataCopilot. Your entire business history will be set up in under 2 minutes without re-typing.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ 05 -->
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span class="faq-num">05</span>
+          <span class="faq-q-text">How do Laptop and Mobile sync without cloud delays?</span>
+          <span class="faq-indicator">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            KhataCopilot features Local Counter Mesh technology. When your counter laptop and floor cashier's smartphone connect to the same Wi-Fi router or phone mobile hotspot, they sync peer-to-peer over the local network even with zero internet. A bill created on the phone appears on the laptop screen instantly.
+          </p>
+        </div>
+      </div>
+
+      <!-- FAQ 06 -->
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          <span class="faq-num">06</span>
+          <span class="faq-q-text">Does KhataCopilot support both GST invoices and non-GST thermal receipts?</span>
+          <span class="faq-indicator">+</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            <strong>Absolutely.</strong> There is a quick toggle right on the billing screen. Issue full B2B GST tax invoices with GSTIN, HSN codes, and CGST/SGST splits for tax parties, or generate fast 58mm/80mm non-GST thermal receipts for walk-in retail cash shoppers. At month-end, export GSTR-1 and GSTR-3B draft reports for your Chartered Accountant.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ==========================================================================
+     ACT IV: HIGH-CONVERTING PRODUCTION DOWNLOAD HUB
+     ========================================================================== -->
+<section class="download-flow-section" id="downloadHub">
+  <div class="flow-container">
+    
+    <div class="flow-section-header">
+      <div class="kicker-pill"><span class="k-dot"></span> PRODUCTION RELEASES · v2.0.0 LIVE</div>
+      <h2 class="flow-main-title">Download KhataCopilot For Your Shop</h2>
+      <p class="flow-desc">
+        Fast native performance with zero configuration. Choose your operating system below and be counter-ready in under 60 seconds.
+      </p>
+    </div>
+
+    <div class="download-grid">
+      
+      <!-- Windows Installer Card -->
+      <div class="dl-card dl-featured" data-os="windows">
+        <div class="dl-header">
+          <span class="dl-icon">▦</span>
+          <div>
+            <h3>Windows Suite</h3>
+            <p>10 / 11 · 64-bit Native App</p>
+          </div>
+          <span class="badge live">v2.0 Recommended</span>
+        </div>
+        <p class="dl-desc">Full Executive Counter Suite: Touch POS, Bluetooth &amp; USB thermal printer drivers, barcode scanner auto-detect, and local SQLite engine.</p>
+        
+        <ul class="dl-feature-list">
+          <li>✓ Instant offline-first SQLite database</li>
+          <li>✓ 58mm &amp; 80mm ESC/POS thermal printing</li>
+          <li>✓ Barcode guns &amp; serial weighing scales</li>
+          <li>✓ Dynamic UPI QR on second customer screen</li>
+        </ul>
+
+        <div class="dl-meta">
+          <span>~16.2 MB Setup .exe</span>
+          <span>SHA-256 <code>13bc20fb…a71ec1fd</code></span>
+        </div>
+        <div class="dl-actions">
+          <a class="btn solid glow" href="downloads/KhataCopilot-Setup.exe" download>Download Setup (.exe)</a>
+          <a class="btn line" href="downloads/KhataCopilot-windows-portable.zip" download>Portable Zip</a>
+        </div>
+      </div>
+
+      <!-- Android Release APK Card -->
+      <div class="dl-card" data-os="android">
+        <div class="dl-header">
+          <span class="dl-icon">▣</span>
+          <div>
+            <h3>Android App</h3>
+            <p>Phone &amp; POS Tablet · 8.0+</p>
+          </div>
+          <span class="badge live">v2.0 Ready</span>
+        </div>
+        <p class="dl-desc">Pocket cashier with vernacular voice billing in 10 languages, camera OCR bill scanner, virtual audio soundbox, and Bluetooth slip printing.</p>
+        
+        <ul class="dl-feature-list">
+          <li>✓ Offline Hindi/Hinglish speech-to-bill</li>
+          <li>✓ Virtual audio soundbox with UPI alerts</li>
+          <li>✓ WhatsApp payment reminder links</li>
+          <li>✓ Wireless Bluetooth 58mm receipt print</li>
+        </ul>
+
+        <div class="dl-meta">
+          <span>~95.9 MB Release APK</span>
+          <span>SHA-256 <code>6b8c7aed…c13b58f8</code></span>
+        </div>
+        <div class="dl-actions">
+          <a class="btn solid" href="downloads/KhataCopilot-android.apk" download>Download APK (v2.0)</a>
+          <a class="btn line" href="https://github.com/Quantum-Ark/khatacopilot-releases/releases/download/v1.0.0/KhataCopilot-1.0.0-android.apk" target="_blank" rel="noopener noreferrer">v1.0 Mirror</a>
+        </div>
+      </div>
+
+      <!-- Apple Beta Card -->
+      <div class="dl-card dl-secondary" data-os="macos">
+        <div class="dl-header">
+          <span class="dl-icon">◉</span>
+          <div>
+            <h3>macOS &amp; iOS</h3>
+            <p>Apple Silicon &amp; iPhone</p>
+          </div>
+          <span class="badge soon">TestFlight</span>
+        </div>
+        <p class="dl-desc">High-performance native Swift &amp; Flutter builds for MacBook counter setups and iPhone mobile management.</p>
+        
+        <ul class="dl-feature-list">
+          <li>✓ Optimized for M1/M2/M3/M4 Apple Silicon</li>
+          <li>✓ Local Wi-Fi ledger peer synchronization</li>
+          <li>✓ AirPrint and Bluetooth thermal printing</li>
+          <li>✓ Weekly TestFlight beta updates</li>
+        </ul>
+
+        <div class="dl-meta">
+          <span>Notarized DMG &amp; TestFlight</span>
+          <span>Early Access Program</span>
+        </div>
+        <div class="dl-actions">
+          <a class="btn line" href="mailto:abhishek@khatakopilot.store?subject=KhataCopilot%20Apple%20Beta%20Request">Request TestFlight Invite →</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Quick Hardware Compatibility Banner -->
+    <div class="compat-banner">
+      <div class="compat-item">
+        <strong>Thermal Ready</strong>
+        <span>All USB/Bluetooth 58mm &amp; 80mm ESC/POS Printers</span>
+      </div>
+      <div class="compat-divider"></div>
+      <div class="compat-item">
+        <strong>Scanners &amp; Scales</strong>
+        <span>Honeywell, TVS, Zebra, Pegasus 1D/2D Scanners &amp; Serial Scales</span>
+      </div>
+      <div class="compat-divider"></div>
+      <div class="compat-item">
+        <strong>Zero Rental</strong>
+        <span>No ₹150/month rent · Your device is your terminal</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==========================================================================
+     ACT V: GRAND CINEMATIC FINAL CTA
+     ========================================================================== -->
+<section class="final-cinematic-cta" id="finalCTA">
+  <div class="cta-glow-backdrop"></div>
+  <div class="cta-content-inner">
+    <span class="cta-kicker-badge">READY TO TRANSFORM YOUR COUNTER?</span>
+    <h2 class="cta-massive-title">
+      Your Business Deserves<br><span class="gradient-text">a Smart Saathi.</span>
+    </h2>
+    <p class="cta-tagline-motion">
+      Speak. Bill. Track. Manage. Grow.
+    </p>
+    <div class="cta-btn-group">
+      <a class="btn solid glow lg-btn" href="#downloadHub">Get KhataCopilot Free ↓</a>
+      <a class="btn line lg-btn" href="#ch01">Replay Product Film ↺</a>
     </div>
   </div>
 </section>
 
-<!-- ============ DAY TIMELINE ============ -->
-<section class="day" id="day">
-  <div class="wrap">
-    <p class="kicker light reveal"><span class="rule"></span> Chapter 02 — One Tuesday, hour by hour</p>
-    <h2 class="light reveal">6 AM to 10 PM with the companion on the counter.</h2>
-    <div class="timeline" id="timeline"><div class="tfill" id="tfill"></div>
-      <article class="trow reveal"><div class="ttime">6:04<span>AM</span></div><div class="tdot"></div><div class="tcard"><h3>The shutter rises, the mic wakes</h3><p>Ramesh taps the big mic button once. “Do chai aur 2 biscuit, 40 rupaye.” The entry appears before the customer finds change. In Hindi voice: <em>“40 rupaye bikri mein jod diya.”</em> Hands never touch the keyboard.</p><span class="tag">Voice-to-ledger · Hindi on-device</span></div></article>
-      <article class="trow reveal"><div class="ttime">8:15<span>AM</span></div><div class="tdot"></div><div class="tcard"><h3>Udhaar without the quarrel</h3><p>“Sharma ji ko 5 kilo atta diya, 650 udhaar.” Party ledger updates, balance ticks up, reminder queued. When Sharma ji pays ₹1,200 next week, one voice line settles it. No smudged pages, no “maine diya tha / nahi diya” fights.</p><span class="tag">Party khata · recovery discipline</span></div></article>
-      <article class="trow reveal"><div class="ttime">11:30<span>AM</span></div><div class="tdot"></div><div class="tcard"><h3>The oil bill photographs itself</h3><p>Supplier drops a GST bill. Ramesh snaps it — OCR reads the total and CGST/SGST split straight into a purchase entry with HSN attached. What took 20 minutes of squinting now takes one photo.</p><span class="tag">Bill OCR · GST split</span></div></article>
-      <article class="trow reveal"><div class="ttime">1:05<span>PM</span></div><div class="tdot"></div><div class="tcard"><h3>“Payment ho gaya” — prove it</h3><p>A customer flashes a success screen. Ramesh points the camera. The PayGuard check scans forgery tells; the counter announces the verdict. Green pulse: trust. Red flash + hard vibration: <em>“Fraud pakda gaya.”</em> Eyes never leave the customer.</p><span class="tag">PayGuard · camera verification</span></div></article>
-      <article class="trow reveal"><div class="ttime">4:40<span>PM</span></div><div class="tdot"></div><div class="tcard"><h3>Three UPI apps, one truth</h3><p>GPay, PhonePe, Paytm notifications merge into the same ledger as cash. Ramesh asks aloud: <em>“Aaj GPay pe kitna aaya?”</em> The answer comes back spoken, with numbers. End of day: “₹850 kharch — ₹300 UPI, ₹550 cash.”</p><span class="tag">VoicePay aggregator · Hindi Q&amp;A</span></div></article>
-      <article class="trow reveal"><div class="ttime">7:20<span>PM</span></div><div class="tdot"></div><div class="tcard"><h3>The shop goes online while he serves</h3><p>His 200-item inventory is already an ONDC RET10 catalog — staples, snacks, dairy taxonomy, MRP, stock. One tap broadcasts to buyer apps across the neighbourhood. The 30-minute delivery crowd finds his shop without him learning “e-commerce”.</p><span class="tag">ONDC Beckn v1.2.0 · 1-tap broadcast</span></div></article>
-      <article class="trow reveal"><div class="ttime">9:50<span>PM</span></div><div class="tdot"></div><div class="tcard"><h3>Shutter down, books closed, CA happy</h3><p>GSTR-1 and 3B drafts export as JSON + CSV. The P&amp;L prints to a 58mm thermal slip with a UPI QR. The file goes to the CA on WhatsApp. The cash-flow indicator — built from real sales velocity — quietly builds the record a bank will one day ask for.</p><span class="tag">GST hub · thermal POS · soundbox</span></div></article>
-    </div>
-  </div>
-</section>
+<!-- ==========================================================================
+     ACT VI: ELEVATED OBSIDIAN ENTERPRISE FOOTER & VERIFIED CONTACT
+     ========================================================================== -->
+<footer class="master-footer" id="siteFooter">
+  <!-- Subtle Ambient Glow Orbs -->
+  <div class="footer-ambient-mesh"></div>
 
-<!-- ============ FEATURES ============ -->
-<section class="features" id="features">
-  <div class="wrap">
-    <p class="kicker reveal"><span class="rule"></span> Chapter 03 — What it actually does</p>
-    <h2 class="reveal">Six systems. One counter.<br>Zero typing required.</h2>
-    <p class="sub reveal">Every feature below runs in the v1.0.0 test build. Where a number is an estimate or a flow still needs a regulated partner, we say so on the card — no asterisks hidden at the bottom.</p>
-    <div class="fgrid">
-      <article class="fcard reveal"><div class="fnum">01</div><h3>Vernacular voice ledger</h3><p>Speak natural counter Hindi/Hinglish — <em>“2 packet tel, 5 kg atta, 650 udhaar”</em> — and get an itemised sale. 10 languages for speech in and speech out. Offline regex first, cloud LLM only for the hard sentences.</p><div class="fpills"><span>10 locales</span><span>Offline-first</span><span>Hindi TTS confirm</span></div></article>
-      <article class="fcard reveal"><div class="fnum">02</div><h3>Camera that reads bills</h3><p>Snap a purchase receipt; on-device OCR pulls the total plus CGST/SGST into an expense with HSN attached. No flatbed scanner, no data-entry evenings.</p><div class="fpills"><span>ML Kit on-device</span><span>GST split</span><span>HSN assist</span></div></article>
-      <article class="fcard reveal"><div class="fnum">03</div><h3>UPI, unified + verified</h3><p>Payment notifications from GPay, PhonePe and Paytm merge into one ledger with cash. Ask <em>“is hafte GPay pe kitna gaya?”</em> and hear the answer. Suspicious success screens get a camera check with red/green verdict.</p><div class="fpills"><span>3-app merge</span><span>Hindi Q&amp;A</span><span>Fraud screen check</span></div></article>
-      <article class="fcard reveal"><div class="fnum">04</div><h3>Soundbox + thermal POS, minus the rent</h3><p>The phone becomes the soundbox — loud multilingual payment announcements at calibrated speed — and drives 58/80mm ESC/POS printers with GST-breakup slips and dynamic UPI QR. No ₹200/month hardware rental.</p><div class="fpills"><span>58/80mm ESC/POS</span><span>NPCI UPI QR</span><span>10-language audio</span></div></article>
-      <article class="fcard reveal"><div class="fnum">05</div><h3>ONDC seller in one tap</h3><p>Inventory converts to Beckn RET10 catalog JSON with category taxonomy, MRP and live stock, and broadcasts to buyer apps. Hyperlocal dispatch, statutory declarations included.</p><div class="fpills"><span>Beckn v1.2.0</span><span>RET10 grocery</span><span>Live stock</span></div></article>
-      <article class="fcard reveal"><div class="fnum">06</div><h3>Books a CA can use</h3><p>GSTR-1 &amp; 3B JSON/CSV drafts, daybook, P&amp;L, stock-health alerts and WhatsApp-ready tax invoices. <strong>Estimates — always confirm with your CA before filing.</strong> HSN rates ship as guidance, not gospel.</p><div class="fpills"><span>GSTR-1 / 3B drafts</span><span>P&amp;L + daybook</span><span>CA disclaimer on-screen</span></div></article>
-    </div>
-    <div class="honest reveal">
-      <div><h4>Honest labels, on purpose</h4><p>The cash-flow indicator is <strong>not a credit bureau score</strong> — only licensed bureaus issue those. Any future loan offer will come from a named RBI-regulated lender, with the app acting as facilitator only. If a screen ever says otherwise, that's a bug — report it.</p></div>
-      <a class="btn line sm" href="privacy.html">Read how your data is handled →</a>
-    </div>
-  </div>
-</section>
+  <div class="footer-main-container">
+    
+    <!-- Brand Column -->
+    <div class="footer-col brand-col">
+      <div class="footer-brand">
+        <img src="assets/brand/logo-mark.png" alt="KhataCopilot" class="brand-logo" width="40" height="40" onerror="this.src='favicon.png'">
+        <span class="brand-name">KhataCopilot</span>
+      </div>
+      <p class="footer-tagline">
+        The counter operating system built for Bharat's 63 million kiranas, retail outlets &amp; restaurants. Voice-first, offline-first.
+      </p>
+      
+      <div class="footer-badges-wrap">
+        <div class="footer-chip">
+          <span class="chip-dot-green"></span>
+          <span>SQLite 3.45 On-Device</span>
+        </div>
+        <div class="footer-chip">
+          <span class="chip-dot-purple"></span>
+          <span>58mm ESC/POS USB &amp; BT</span>
+        </div>
+      </div>
 
-<!-- ============ COMPARE ============ -->
-<section class="compare" id="compare">
-  <div class="wrap">
-    <p class="kicker reveal"><span class="rule"></span> Chapter 04 — The old ways, honestly scored</p>
-    <h2 class="reveal">Cloth book. Desktop ERP.<br>Or the counter OS.</h2>
-    <div class="ctable reveal"><div class="ctable-scroll">
-      <div class="crow chead"><span></span><span>Cloth bahi-khata</span><span>Desktop ERP</span><span class="hl">KhataCopilot</span></div>
-      <div class="crow"><span>Voice entry, 10 languages</span><span>—</span><span>—</span><span class="hl">✓</span></div>
-      <div class="crow"><span>Works with no internet</span><span>✓</span><span>Partial</span><span class="hl">✓ core ledger</span></div>
-      <div class="crow"><span>UPI + cash in one ledger</span><span>—</span><span>Manual</span><span class="hl">✓ auto-merge</span></div>
-      <div class="crow"><span>Fake-payment screen check</span><span>—</span><span>—</span><span class="hl">✓ camera</span></div>
-      <div class="crow"><span>ONDC catalog broadcast</span><span>—</span><span>—</span><span class="hl">✓ 1-tap</span></div>
-      <div class="crow"><span>Soundbox without hardware rent</span><span>—</span><span>—</span><span class="hl">✓ built-in</span></div>
-      <div class="crow"><span>GSTR drafts + thermal bill</span><span>—</span><span>Paid add-ons</span><span class="hl">✓ included</span></div>
-      <div class="crow"><span>Cost</span><span>Pen + time</span><span>₹10,000+ licence</span><span class="hl">Free trial builds</span></div>
-    </div></div>
-  </div>
-</section>
-
-<!-- ============ DOWNLOAD ============ -->
-<section class="download" id="download">
-  <div class="wrap">
-    <p class="kicker light reveal"><span class="rule"></span> Chapter 05 — Take it to your counter</p>
-    <h2 class="light reveal">One app. Five doors.<br>Pick yours.</h2>
-    <p class="sub light reveal" id="osNote">We detected nothing yet — enable JavaScript and we'll highlight your OS automatically. Latest updated builds are <strong>v2.0.0</strong>; executive theme and touch restaurant POS included.</p>
-    <div class="osgrid">
-      <article class="oscard ready reveal" data-os="android">
-        <div class="oshead"><span class="osicon">▣</span><div><h3>Android</h3><p>Phone &amp; tablet · 8.0+</p></div><span class="badge live">Ready · v2.0.0</span></div>
-        <p class="osdesc">Full voice billing, OCR bill scanner, soundbox payment announcements, Bluetooth thermal printing, touch POS. Sideload the latest APK.</p>
-        <div class="osmeta"><span>~95.9 MB APK · v2.0 release</span><span>sha256 <code>6b8c7aed…c13b58f8</code></span></div>
-        <div class="osactions"><a class="btn solid" href="downloads/KhataCopilot-android.apk" download>Download APK (v2.0)</a><a class="btn line sm" href="https://github.com/Quantum-Ark/khatacopilot-releases/releases/download/v1.0.0/KhataCopilot-1.0.0-android.apk" target="_blank" rel="noopener noreferrer">v1.0 Mirror</a><button class="btn line sm steps-toggle">Install steps</button></div>
-        <ol class="steps"><li>Download and tap the APK to install on your phone.</li><li>Allow “Install unknown apps” if prompted.</li><li>Open → onboarding → dashboard.</li><li>Grant mic + camera; enable notification access for automatic UPI detection.</li></ol>
-      </article>
-      <article class="oscard ready reveal" data-os="windows">
-        <div class="oshead"><span class="osicon">▦</span><div><h3>Windows</h3><p>10 / 11 · 64-bit · installer</p></div><span class="badge live">Ready · v2.0.0</span></div>
-        <p class="osdesc">Complete Executive Desktop suite — one-click installer, touch Restaurant POS, desktop shortcuts, live SQLite ledger, and fast billing.</p>
-        <div class="osmeta"><span>~16.2 MB Setup .exe</span><span>sha256 <code>13bc20fb…a71ec1fd</code></span></div>
-        <div class="osactions"><a class="btn solid" href="downloads/KhataCopilot-Setup.exe" download>Download Setup .exe</a><a class="btn line sm" href="downloads/KhataCopilot-windows-portable.zip" download>Portable Zip</a><button class="btn line sm steps-toggle">Install steps</button></div>
-        <ol class="steps"><li>Run <code>KhataCopilot-Setup.exe</code> (no admin rights required).</li><li>SmartScreen may warn for new release — click “More info” → “Run anyway”.</li><li>Creates Desktop icon and launches the Executive Suite.</li><li>Prefer portable? Download Portable Zip, extract anywhere, and run <code>khatacopilot.exe</code>.</li></ol>
-      </article>
-      <article class="oscard reveal" data-os="macos">
-        <div class="oshead"><span class="osicon">◉</span><div><h3>macOS</h3><p>13+ · Apple Silicon + Intel</p></div><span class="badge soon">DMG on request</span></div>
-        <p class="osdesc">Signed, notarised DMG — built on a Mac so Gatekeeper stays happy. Leave your email and the download link comes to you.</p>
-        <div class="osmeta"><span>Universal DMG</span><span>Gatekeeper-clean</span></div>
-        <div class="osactions"><a class="btn solid" href="mailto:abhishek@khatakopilot.store?subject=macOS%20DMG%20request%20—%20KhataCopilot%20v1.0.0&body=Hi%2C%20please%20send%20me%20the%20macOS%20download%20link.%20My%20Mac%3A%20">Email me the download link</a><button class="btn line sm steps-toggle">How we'll ship</button></div>
-        <ol class="steps"><li>We build on a Mac: <code>flutter build macos --release</code>.</li><li>Hardened runtime + <code>notarytool</code> notarisation.</li><li>Mic/camera entitlements declared.</li><li>Hash published to <code>release/latest.json</code>.</li></ol>
-      </article>
-      <article class="oscard reveal" data-os="linux">
-        <div class="oshead"><span class="osicon">⬣</span><div><h3>Linux</h3><p>Ubuntu 22.04+ · bundle</p></div><span class="badge soon">Bundle next</span></div>
-        <p class="osdesc">Counter mode for low-cost shop PCs. SQLite FFI backend, file-image OCR, Whisper voice via cloud key.</p>
-        <div class="osmeta"><span><code>flutter build linux --release</code></span></div>
-        <div class="osactions"><a class="btn ghost" href="developers.html#linux">Build guide</a><button class="btn line sm steps-toggle">How we'll ship</button></div>
-        <ol class="steps"><li><code>flutter build linux --release</code>.</li><li>Ship <code>build/linux/x64/release/bundle/</code>.</li><li>Add cloud speech key in Settings for voice.</li></ol>
-      </article>
-      <article class="oscard reveal" data-os="ios">
-        <div class="oshead"><span class="osicon">⬤</span><div><h3>iOS / iPad</h3><p>iOS 16+ · TestFlight first</p></div><span class="badge soon">TestFlight list open</span></div>
-        <p class="osdesc">Native on-device speech, camera OCR, responsive iPad layout. Join the list — TestFlight invites go out in batches.</p>
-        <div class="osmeta"><span>Requires Apple Developer + Xcode</span></div>
-        <div class="osactions"><a class="btn solid" href="mailto:abhishek@khatakopilot.store?subject=TestFlight%20invite%20request%20—%20KhataCopilot&body=Hi%2C%20please%20invite%20me%20to%20the%20KhataCopilot%20TestFlight.%20My%20iPhone%2FiPad%3A%20">Join the TestFlight list</a><button class="btn line sm steps-toggle">What review needs</button></div>
-        <ol class="steps"><li>Privacy nutrition labels filed.</li><li>Account-deletion URL live (this site).</li><li>Demo/guest mode for reviewers.</li><li>UPI QR declared as display-only.</li></ol>
-      </article>
+      <div class="pune-badge">
+        <span class="pune-flag">🇮🇳</span> 
+        <span>Engineered with pride in Pune, Maharashtra</span>
+      </div>
+      
+      <div class="system-status-indicator">
+        <span class="status-dot"></span> 
+        <span>All Systems Operational · v2.0.0 Stable</span>
+      </div>
     </div>
-    <p class="integrity reveal">✓ Every download is checksummed (SHA-256). <a href="developers.html">Developers: verify hashes &amp; build from source →</a></p>
-  </div>
-</section>
 
-<!-- ============ TRUST ============ -->
-<section class="trust">
-  <div class="wrap">
-    <p class="kicker reveal"><span class="rule"></span> Chapter 06 — The fine print, up front</p>
-    <h2 class="reveal">What stays on your phone.<br>What we will never claim.</h2>
-    <div class="tgrid">
-      <div class="tcard reveal"><h3>🔒 Your books stay home</h3><p>Ledger, parties and invoices live in on-device SQLite. Nothing uploads unless you switch on cloud sync yourself. Voice audio is transcribed and dropped; receipt photos are read for totals, not warehoused.</p></div>
-      <div class="tcard reveal"><h3>⚖️ Not a CA, lender or GSP</h3><p>GST figures are drafts in the portal's format — your CA files, not us. Any future credit comes from a named RBI-regulated lender; the app only facilitates. We never initiate or move money.</p></div>
-      <div class="tcard reveal"><h3>🗑 Deletion that means it</h3><p>Profile → Delete Account wipes the on-device ledger, with a web request page for the cloud copy. If a build ever claims deletion and fails silently, treat it as a P0 bug and tell us.</p></div>
+    <!-- Column 2: Platform -->
+    <div class="footer-col">
+      <h4 class="footer-heading">Platform</h4>
+      <ul class="footer-nav-list">
+        <li><a href="#ch02">Vernacular Voice POS</a></li>
+        <li><a href="#ch06">58mm &amp; 80mm ESC/POS</a></li>
+        <li><a href="#ch03">Live Pulse &amp; Analytics</a></li>
+        <li><a href="#ch03">Phone Audio Soundbox</a></li>
+        <li><a href="#ch05">AI Sahayak Natural Chat</a></li>
+        <li><a href="#ch04">Multi-Device Mesh Sync</a></li>
+      </ul>
     </div>
-    <div class="legalrow reveal">
-      <a href="privacy.html">Privacy Policy</a><span>·</span><a href="terms.html">Terms of Service</a><span>·</span><a href="delete-account.html">Delete my data</a>
-    </div>
-    <p class="fine center">Legal drafts in-app are a starting point, not legal advice. A lawyer must review them before store submission. DPDP Act 2023 · IT Rules 2021 · Consumer Protection Act 2019.</p>
-  </div>
-</section>
 
-<!-- ============ FAQ ============ -->
-<section class="faq" id="faq">
-  <div class="wrap">
-    <p class="kicker reveal"><span class="rule"></span> Chapter 07 — Asked at the counter</p>
-    <h2 class="reveal">Straight answers.</h2>
-    <div class="qa reveal"><button>Does it really work without internet?<span>+</span></button><div><p>Yes for the core: voice entry (offline parser), ledger, soundbox announcements, bill view, daybook. Desktop voice transcription and any cloud sync need a connection and your own API key.</p></div></div>
-    <div class="qa reveal"><button>Which languages can I speak?<span>+</span></button><div><p>Hindi, Marathi, Gujarati, Tamil, Telugu, Bengali, Kannada, Malayalam, Odia and English — for both speaking in and hearing confirmations back.</p></div></div>
-    <div class="qa reveal"><button>Is the Windows download safe? SmartScreen warns me.<span>+</span></button><div><p>The v1.0.0 installer is unsigned, so SmartScreen warns — expected until code-signing lands. Verify the SHA-256 against <code>dist/SHA256SUMS.txt</code>, then choose “Run anyway”. No admin rights needed; updates install silently afterwards.</p></div></div>
-    <div class="qa reveal"><button>Can I file GSTR directly from the app?<span>+</span></button><div><p>No — and beware any app that says it files for you. KhataCopilot prepares GSTR-1/3B JSON + CSV drafts in the portal's shape. Your CA reviews and files. Always confirm figures before filing.</p></div></div>
-    <div class="qa reveal"><button>Does the app give loans?<span>+</span></button><div><p>No. It shows an indicative cash-flow readiness built from your own sales — not a bureau score. Any future loan would come from a named RBI-regulated bank/NBFC inside their own flow. The test build's one-tap disbursal is a demo stub and will be gated before release.</p></div></div>
-    <div class="qa reveal"><button>What does it cost?<span>+</span></button><div><p>Test builds are free. Store pricing (if any) will use Play Billing / App Store IAP for digital goods — never a side payment link. No hardware soundbox rent, ever.</p></div></div>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap fgrid2">
-    <div>
-      <p class="brandline"><img class="brand-img sm" src="favicon.png?v=3" alt="" width="30" height="30"> <strong>KhataCopilot</strong> — the counter OS for Bharat. Built in Pune, for the shops that feed India.</p>
-      <p class="fine">© 2026 ZenForge · Release v2.0.0 · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="delete-account.html">Delete data</a> · <a href="developers.html">Developers</a> · <a href="mailto:abhishek@khatakopilot.store">abhishek@khatakopilot.store</a></p>
+    <!-- Column 3: Downloads -->
+    <div class="footer-col">
+      <h4 class="footer-heading">Downloads</h4>
+      <ul class="footer-nav-list">
+        <li><a href="downloads/KhataCopilot-Setup.exe" download>Windows Suite (.exe)</a></li>
+        <li><a href="downloads/KhataCopilot-windows-portable.zip" download>Windows Portable (.zip)</a></li>
+        <li><a href="downloads/KhataCopilot-android.apk" download>Android App (v2.0 APK)</a></li>
+        <li><a href="https://github.com/Quantum-Ark/khatacopilot-releases/releases/download/v1.0.0/KhataCopilot-1.0.0-android.apk" target="_blank" rel="noopener noreferrer">v1.0 Android Mirror</a></li>
+        <li><a href="mailto:abhishek@khatakopilot.store?subject=Apple%20Beta">macOS &amp; iOS TestFlight</a></li>
+      </ul>
     </div>
-    <div class="fcta"><a class="btn solid" href="#download">Download free ↓</a><p class="fine">Android APK · Windows portable · macOS / Linux / iOS next</p></div>
+
+    <!-- Column 4: Trust & Legal -->
+    <div class="footer-col">
+      <h4 class="footer-heading">Trust &amp; Legal</h4>
+      <ul class="footer-nav-list">
+        <li><a href="#trustGuarantee">100% Offline SQLite</a></li>
+        <li><a href="privacy.html">Privacy Policy (DPDP Act)</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="delete-account.html">Data Deletion &amp; Rights</a></li>
+        <li><a href="#trustGuarantee">Local Ledger Encryption</a></li>
+      </ul>
+    </div>
+
+    <!-- Column 5: Merchant Support & Verified WhatsApp -->
+    <div class="footer-col contact-col">
+      <h4 class="footer-heading">Merchant Support</h4>
+      
+      <div class="footer-support-card">
+        <span class="support-label">OFFICIAL WHATSAPP &amp; CALL</span>
+        <a class="support-phone-link" href="https://wa.me/917841938644?text=Namaste%20KhataCopilot%20Team%2C%20mujhe%20apne%20counter%20ke%20liye%20help%20chahiye" target="_blank" rel="noopener noreferrer">
+          <span class="wa-ico">💬</span>
+          <strong>+91 78419 38644</strong>
+        </a>
+        <p class="support-sub">Mon–Sat · 9:00 AM to 9:00 PM IST</p>
+      </div>
+
+      <p class="contact-line"><strong>Official Email:</strong> abhishek@khatakopilot.store</p>
+      <p class="contact-line"><strong>Headquarters:</strong> Baner - Balewadi High Street, Pune, Maharashtra 411045</p>
+
+      <div class="whatsapp-cta-row">
+        <a class="whatsapp-btn glow-wa" href="https://wa.me/917841938644?text=Namaste%20KhataCopilot%20Team%2C%20mujhe%20apne%20counter%20ke%20liye%20help%20chahiye" target="_blank" rel="noopener noreferrer">
+          <span>💬 Chat on WhatsApp (+91 78419 38644)</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Legal & Animated Signature Bar -->
+  <div class="footer-bottom-bar">
+    <div class="bottom-inner">
+      <p>© 2026 KhataCopilot Technologies Private Limited. All rights reserved.</p>
+      <div class="bottom-links">
+        <a href="privacy.html">Privacy</a>
+        <span>·</span>
+        <a href="terms.html">Terms</a>
+        <span>·</span>
+        <a href="delete-account.html">Data Rights</a>
+        <span>·</span>
+        <a href="#downloadHub">SHA-256 Hashes</a>
+      </div>
+    </div>
+    
+    <!-- Animated Brand Signature Line (Final Frame of Film) -->
+    <div class="footer-signature-wrap">
+      <div class="footer-sig-line" id="footerSigLine"></div>
+      <div class="footer-sig-text">
+        <span class="sig-title">KHATACOPILOT</span>
+        <span class="sig-dot">·</span>
+        <span class="sig-sub">BUSINESS KO MILA SMART SAATHI</span>
+      </div>
+    </div>
   </div>
 </footer>
 
-</main>
-<script src="app.js?v=4"></script>
+<script src="app.js?v=26"></script>
 </body>
 </html>

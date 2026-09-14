@@ -1,356 +1,649 @@
-/* KhataCopilot site interactions — no deps. Respects prefers-reduced-motion. */
-(function(){
+/* ==========================================================================
+   KhataCopilot — Adaptive Cinematic Motion & Responsive Engine (app.js)
+   - Dynamic Chapter HUD Auto-Hide (Fades out when leaving Film Chapters)
+   - Clean Navbar Navigation (Pure Text, Zero Number Clutter)
+   - Responsive Canvas Engine with Adaptive DPR (Mobile, Tablet, Desktop, 4K)
+   - 100% Star Watermark Elimination across All Aspect Ratios
+   - Orientation Change Auto-Recalculation
+   - Verified WhatsApp Contact (+91 78419 38644)
+   - Trust Flow, Editorial FAQ Accordion, and Footer Signature Line
+   ========================================================================== */
+
+(function () {
   "use strict";
-  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* scroll progress bar + timeline fill */
-  var bar = document.getElementById("progress"),
-      nav = document.getElementById("nav"),
-      tline = document.getElementById("timeline"),
-      tfill = document.getElementById("tfill");
-  function onScroll(){
-    var h = document.documentElement,
-        p = h.scrollTop / Math.max(h.scrollHeight - h.clientHeight, 1);
-    if(bar) bar.style.width = (p*100).toFixed(2) + "%";
-    if(tline && tfill){
-      var r = tline.getBoundingClientRect(),
-          seen = Math.min(Math.max((innerHeight*0.65 - r.top) / r.height, 0), 1);
-      tfill.style.height = (seen*100).toFixed(1) + "%";
-    }
-    if(nav) nav.style.boxShadow = scrollY > 8 ? "0 8px 24px -16px rgba(25,20,16,.4)" : "none";
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  // ------------------------------------------------------------------------
+  // 1. DOM REFERENCES
+  // ------------------------------------------------------------------------
+  var loadingScreen = document.getElementById("loadingScreen"),
+      loadingBeam = document.getElementById("loadingBeam"),
+      loadingLogoLockup = document.getElementById("loadingLogoLockup"),
+      loadingPillars = document.getElementById("loadingPillars"),
+      skipLoadingBtn = document.getElementById("skipLoadingBtn"),
+      timelineBar = document.getElementById("scrollTimeline"),
+      navHud = document.getElementById("navHud"),
+      navBurger = document.getElementById("navBurger"),
+      mobileNav = document.getElementById("mobileNavPanel"),
+      chapterHud = document.getElementById("chapterHud"),
+      hudCounter = document.getElementById("hudCounter"),
+      hudTitle = document.getElementById("hudTitle"),
+      hudBarFill = document.getElementById("hudBarFill"),
+      trustSequence = document.getElementById("trustSequence"),
+      footerSigLine = document.getElementById("footerSigLine"),
+      filmContainer = document.getElementById("filmContainer");
+
+  var chapterTracks = Array.prototype.slice.call(document.querySelectorAll(".chapter-track"));
+  var currentActiveChapter = 1;
+  var isLoaded = false;
+
+  // ------------------------------------------------------------------------
+  // 2. BRANDED LOADING & LOGO REVEAL SEQUENCE
+  // ------------------------------------------------------------------------
+  function dismissLoadingScreen() {
+    if (!loadingScreen || loadingScreen.classList.contains("dismissed")) return;
+    loadingScreen.classList.add("dismissed");
+    document.body.classList.remove("is-loading");
+    isLoaded = true;
+
+    setTimeout(function () {
+      updateTrackCache();
+      handleScroll();
+    }, 300);
   }
-  addEventListener("scroll", onScroll, {passive:true}); onScroll();
 
-  /* hero-stage parallax (fine pointers only) */
-  var stage = document.querySelector(".hero-stage");
-  if(stage && !reduce && matchMedia("(fine: pointer)").matches){
-    var hero = document.querySelector(".hero");
-    hero.addEventListener("mousemove", function(e){
-      var r = hero.getBoundingClientRect(),
-          x = (e.clientX - r.left) / r.width - .5,
-          y = (e.clientY - r.top) / r.height - .5;
-      stage.style.transform = "translate("+(x*14).toFixed(1)+"px,"+(y*10).toFixed(1)+"px)";
+  function initLoadingSequence() {
+    if (!loadingScreen) {
+      isLoaded = true;
+      return;
+    }
+
+    document.body.classList.add("is-loading");
+
+    if (reduceMotion) {
+      setTimeout(dismissLoadingScreen, 200);
+      return;
+    }
+
+    // Step 1: Purple light beam sweeps across screen
+    setTimeout(function () {
+      if (loadingBeam) loadingBeam.classList.add("active");
+    }, 150);
+
+    // Step 2: Authentic KhataCopilot K Logo reveals with radiant glow
+    setTimeout(function () {
+      if (loadingLogoLockup) loadingLogoLockup.classList.add("reveal");
+    }, 600);
+
+    // Step 3: Subtle BILL · TRACK · MANAGE · GROW reveal
+    setTimeout(function () {
+      if (loadingPillars) loadingPillars.classList.add("reveal");
+    }, 1200);
+
+    // Step 4: Graceful expansion into main cinematic frame
+    setTimeout(function () {
+      dismissLoadingScreen();
+    }, 2400);
+
+    // Click anywhere to enter instantly
+    if (skipLoadingBtn) {
+      skipLoadingBtn.addEventListener("click", dismissLoadingScreen);
+    }
+    loadingScreen.addEventListener("click", dismissLoadingScreen);
+  }
+
+  // ------------------------------------------------------------------------
+  // 3. ADAPTIVE CANVAS FRAME SCRUBBER ENGINE (MOBILE & DESKTOP)
+  // ------------------------------------------------------------------------
+  var CanvasScrubber = function (canvasEl, folderId) {
+    this.canvas = canvasEl;
+    this.ctx = canvasEl.getContext("2d", { alpha: false });
+    this.folder = String(folderId);
+    this.totalFrames = 50;
+    this.images = [];
+    this.loaded = [];
+    this.currentProgress = 0;
+    this.targetProgress = 0;
+    this.lastDrawn = -1;
+    this.isVisible = true;
+
+    this.init();
+  };
+
+  CanvasScrubber.prototype.getFrameUrl = function (index) {
+    var num = String(index + 1).padStart(3, "0");
+    return "assets/frames/" + this.folder + "/ezgif-frame-" + num + ".png";
+  };
+
+  CanvasScrubber.prototype.init = function () {
+    var self = this;
+    // Priority preloading: Key frames loaded first for instantaneous visual paint
+    var priority = [0, 12, 24, 36, 49];
+    priority.forEach(function (idx) {
+      self.preloadSingle(idx);
     });
-    hero.addEventListener("mouseleave", function(){ stage.style.transform = ""; });
-    /* magnetic primary buttons */
-    document.querySelectorAll(".hero-actions .btn.solid, .oscard .btn.solid").forEach(function(b){
-      b.addEventListener("mousemove", function(e){
-        var r = b.getBoundingClientRect();
-        b.style.transform = "translate("+((e.clientX-r.left-r.width/2)*.12).toFixed(1)+"px,"+((e.clientY-r.top-r.height/2)*.18).toFixed(1)+"px)";
+
+    // Progressive secondary preload of all other frames in idle slices
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(function () {
+        self.preloadRemaining(priority);
       });
-      b.addEventListener("mouseleave", function(){ b.style.transform = ""; });
-    });
-  }
-
-  /* mobile menu */
-  var burger = document.getElementById("burger"), mm = document.getElementById("mobilemenu");
-  if(burger && mm){
-    burger.addEventListener("click", function(){
-      var open = mm.classList.toggle("open");
-      burger.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    mm.querySelectorAll("a").forEach(function(a){ a.addEventListener("click", function(){
-      mm.classList.remove("open"); burger.setAttribute("aria-expanded", "false");
-    }); });
-    /* rotating to landscape / resizing to desktop must not trap the menu */
-    addEventListener("resize", function(){
-      if(innerWidth > 900){ mm.classList.remove("open"); burger.setAttribute("aria-expanded", "false"); }
-    });
-  }
-
-  /* scroll reveal (with fallback: text must never stay invisible) */
-  var revealEls = document.querySelectorAll(".reveal");
-  if(!("IntersectionObserver" in window)){
-    revealEls.forEach(function(el){ el.classList.add("in"); });
-  } else {
-    var io = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, {threshold:.08});
-    revealEls.forEach(function(el){ io.observe(el); });
-    /* safety net: reveal anything still hidden after 4s (e.g. odd embeds) */
-    setTimeout(function(){
-      revealEls.forEach(function(el){
-        var r = el.getBoundingClientRect();
-        if(r.top < innerHeight && r.bottom > 0) el.classList.add("in");
-      });
-    }, 4000);
-  }
-
-  /* animated counters */
-  var cio = new IntersectionObserver(function(es){
-    es.forEach(function(e){
-      if(!e.isIntersecting) return; cio.unobserve(e.target);
-      var el = e.target, target = +el.dataset.count, t0 = null;
-      if(reduce){ el.textContent = target; return; }
-      function step(t){ if(!t0) t0 = t; var p = Math.min((t-t0)/1400, 1);
-        el.textContent = Math.round(target * (1-Math.pow(1-p,3))); if(p<1) requestAnimationFrame(step); }
-      requestAnimationFrame(step);
-    });
-  }, {threshold:.6});
-  document.querySelectorAll("[data-count]").forEach(function(el){ cio.observe(el); });
-
-  /* OS detection -> highlight card + hero label */
-  var ua = navigator.userAgent || "", plat = (navigator.platform || "").toLowerCase();
-  var os = "unknown", label = "your device";
-  if(/android/i.test(ua)){ os="android"; label="Android"; }
-  else if(/iPad|iPhone|iPod/.test(ua) || (plat==="macintel" && navigator.maxTouchPoints>1)){ os="ios"; label="iOS"; }
-  else if(/Win/.test(plat) || /Windows/.test(ua)){ os="windows"; label="Windows"; }
-  else if(/Mac/.test(plat)){ os="macos"; label="macOS"; }
-  else if(/Linux/.test(plat)){ os="linux"; label="Linux"; }
-  var note = document.getElementById("osNote"), heroOs = document.getElementById("heroOs"), heroBtn = document.getElementById("heroDownload");
-  var card = document.querySelector('.oscard[data-os="'+os+'"]');
-  if(card){
-    card.classList.add("you");
-    var b = card.querySelector(".badge"); if(b) b.textContent += " · yours";
-    if(note) note.innerHTML = "Looks like you're on <strong>"+label+"</strong> — we've highlighted your card below. Test builds are <strong>v1.0.0</strong>; signed store releases follow after the audit fixes land.";
-    if(heroBtn && (os==="android" || os==="windows")){
-      heroBtn.target = "_blank";
-      heroBtn.rel = "noopener noreferrer";
-    }
-    if(heroBtn && os==="android") heroBtn.href = "https://github.com/Quantum-Ark/khatacopilot-releases/releases/download/v1.0.0/KhataCopilot-1.0.0-android.apk";
-    if(heroBtn && os==="windows") heroBtn.href = "https://github.com/Quantum-Ark/khatacopilot-releases/releases/download/v1.0.0/KhataCopilot-Setup-1.0.0.exe";
-  }
-
-  /* install-steps toggles */
-  document.querySelectorAll(".steps-toggle").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      var steps = btn.closest(".oscard").querySelector(".steps");
-      var open = steps.classList.toggle("open");
-      btn.textContent = open ? "Hide steps" : "Install steps";
-    });
-  });
-
-  /* FAQ accordion */
-  document.querySelectorAll(".qa").forEach(function(q){
-    q.querySelector("button").addEventListener("click", function(){
-      var was = q.classList.contains("open");
-      document.querySelectorAll(".qa.open").forEach(function(o){ o.classList.remove("open"); });
-      if(!was) q.classList.add("open");
-    });
-  });
-
-  /* phone demo: type ledger lines, confirm, loop */
-  var lines = [
-    {t:"06:12", d:"Do chai, 2 biscuit — counter sale", a:"+ ₹40", say:"40 rupaye bikri mein jod diya"},
-    {t:"06:40", d:"Sharma ji — 5 kg atta, udhaar", a:"₹650 due", say:"650 rupaye udhaar likh diya"},
-    {t:"07:02", d:"Ramesh paid 1200 cash — settled", a:"+ ₹1,200", say:"1200 cash jama, hisaab barabar"},
-    {t:"07:20", d:"GPay UPI received — verified ✓", a:"+ ₹200", say:"200 rupaye UPI se prapt hue"}
-  ];
-  var typeEl = document.getElementById("typeText"), ledger = document.getElementById("ledger"),
-      confirm = document.getElementById("psConfirm"), micLabel = document.getElementById("micLabel");
-  if(typeEl && ledger && !reduce){
-    var li = 0;
-    function playLine(){
-      var L = lines[li % lines.length];
-      if(micLabel) micLabel.textContent = "Sun raha hai… “" + L.d + "”";
-      var full = L.d + "  →  " + L.a, ci = 0;
-      typeEl.textContent = "";
-      var typer = setInterval(function(){
-        typeEl.textContent = full.slice(0, ++ci);
-        if(ci >= full.length){
-          clearInterval(typer);
-          var row = document.createElement("div");
-          row.className = "lrow new";
-          row.innerHTML = '<span class="lt"></span><span class="ld"></span><span class="la"></span>';
-          row.children[0].textContent = L.t; row.children[1].textContent = L.d; row.children[2].textContent = L.a;
-          ledger.appendChild(row);
-          while(ledger.children.length > 3) ledger.removeChild(ledger.firstChild);
-          if(confirm){ confirm.textContent = "✓ " + L.say; confirm.classList.add("show");
-            setTimeout(function(){ confirm.classList.remove("show"); }, 1800); }
-          li++; setTimeout(playLine, 2600);
-        }
-      }, 28);
-    }
-    setTimeout(playLine, 1200);
-  }
-
-  /* timeline progress dots */
-  var dots = document.querySelectorAll(".tdot");
-  var dio = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.style.background = "#E9B44C"; } });
-  }, {threshold:.8});
-  dots.forEach(function(d){ dio.observe(d); });
-
-  /* ==========================================================================
-     CINEMATIC SCROLL-LINKED HERO SEQUENCE ANIMATION (Apple-level smooth)
-     - 50 progressive image frames (ezgif-frame-001.png / frame-001.png)
-     - Continuous requestAnimationFrame loop with smooth lerp interpolation
-     - High-DPI / Retina canvas scaling + cover containment
-     - Seamless background blending
-     - Respects prefers-reduced-motion
-     ========================================================================== */
-  var heroCanvas = document.getElementById("heroSequenceCanvas");
-  var heroTrack = document.getElementById("heroScrollTrack");
-
-  if(heroCanvas && heroTrack){
-    var ctx = heroCanvas.getContext("2d");
-    var totalFrames = 50;
-    var images = new Array(totalFrames);
-    var loaded = new Array(totalFrames);
-    var targetFrame = 0;
-    var currentFrame = 0;
-    var lastDrawnFrame = -1;
-    var isRenderLoopActive = false;
-
-    // Build frame URL helper (checks primary and fallback naming)
-    function getFrameUrl(idx){
-      var num = String(idx + 1).padStart(3, "0");
-      return "khatapng/ezgif-frame-" + num + ".png";
+    } else {
+      setTimeout(function () {
+        self.preloadRemaining(priority);
+      }, 400);
     }
 
-    // High DPI Canvas resize handler
-    function resizeCanvas(){
-      if(!heroCanvas) return;
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var w = heroCanvas.clientWidth || window.innerWidth;
-      var h = heroCanvas.clientHeight || window.innerHeight;
-      if(heroCanvas.width !== Math.round(w * dpr) || heroCanvas.height !== Math.round(h * dpr)){
-        heroCanvas.width = Math.round(w * dpr);
-        heroCanvas.height = Math.round(h * dpr);
-        lastDrawnFrame = -1; // Force repaint
+    this.resize();
+  };
+
+  CanvasScrubber.prototype.preloadRemaining = function (priorityList) {
+    var self = this;
+    for (var i = 0; i < this.totalFrames; i++) {
+      if (priorityList.indexOf(i) === -1) {
+        (function (idx) {
+          setTimeout(function () {
+            self.preloadSingle(idx);
+          }, idx * 12);
+        })(i);
       }
-      drawFrame(Math.round(currentFrame));
+    }
+  };
+
+  CanvasScrubber.prototype.preloadSingle = function (idx) {
+    if (this.images[idx]) return;
+    var self = this;
+    var img = new Image();
+    img.src = this.getFrameUrl(idx);
+    img.onload = function () {
+      self.loaded[idx] = true;
+      if (idx === 0 && self.lastDrawn === -1) {
+        self.draw(0);
+      } else if (Math.round(self.currentProgress * (self.totalFrames - 1)) === idx) {
+        self.draw(idx);
+      }
+    };
+    this.images[idx] = img;
+  };
+
+  CanvasScrubber.prototype.resize = function () {
+    var rect = this.canvas.getBoundingClientRect();
+    // Intelligent DPR capping: 1.5 on mobile to conserve GPU memory, 2 on desktop
+    var maxDpr = window.innerWidth < 768 ? 1.5 : 2;
+    var dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+    this.canvas.width = Math.max(Math.round(rect.width * dpr), 280);
+    this.canvas.height = Math.max(Math.round(rect.height * dpr), 160);
+    if (this.lastDrawn >= 0) {
+      this.draw(this.lastDrawn);
+    }
+  };
+
+  CanvasScrubber.prototype.setProgress = function (progress) {
+    this.targetProgress = Math.max(0, Math.min(1, progress));
+  };
+
+  CanvasScrubber.prototype.updateAndDraw = function () {
+    if (!this.isVisible) return;
+    // Silky smooth inertia interpolation (0.09 lerp factor)
+    var diff = this.targetProgress - this.currentProgress;
+    if (Math.abs(diff) > 0.0005) {
+      this.currentProgress += diff * 0.09;
+    } else {
+      this.currentProgress = this.targetProgress;
     }
 
-    // Render single frame with seamless cover scaling
-    function drawFrame(idx){
-      if(!ctx || !heroCanvas) return;
-      var img = images[idx];
-      // If the target frame hasn't finished loading yet, find the nearest loaded frame
-      if(!img || !img.complete || img.naturalWidth === 0){
-        for(var offset = 1; offset < totalFrames; offset++){
-          if(idx - offset >= 0 && images[idx - offset] && images[idx - offset].complete){
-            img = images[idx - offset];
-            break;
-          }
-          if(idx + offset < totalFrames && images[idx + offset] && images[idx + offset].complete){
-            img = images[idx + offset];
-            break;
-          }
+    var frameIndex = Math.min(Math.floor(this.currentProgress * this.totalFrames), this.totalFrames - 1);
+    frameIndex = Math.max(0, frameIndex);
+
+    if (frameIndex !== this.lastDrawn) {
+      this.draw(frameIndex);
+    }
+  };
+
+  CanvasScrubber.prototype.draw = function (frameIndex) {
+    var img = this.images[frameIndex];
+    if (!img || !this.loaded[frameIndex]) {
+      // Nearest loaded fallback frame
+      for (var d = 1; d < this.totalFrames; d++) {
+        if (frameIndex - d >= 0 && this.loaded[frameIndex - d]) {
+          img = this.images[frameIndex - d];
+          break;
+        }
+        if (frameIndex + d < this.totalFrames && this.loaded[frameIndex + d]) {
+          img = this.images[frameIndex + d];
+          break;
         }
       }
+    }
+    if (!img) return;
 
-      if(!img || !img.complete || img.naturalWidth === 0) return;
+    this.lastDrawn = frameIndex;
+    var cw = this.canvas.width;
+    var ch = this.canvas.height;
+    var iw = img.naturalWidth || 1920;
+    var ih = img.naturalHeight || 1080;
 
-      var cw = heroCanvas.width;
-      var ch = heroCanvas.height;
-      var iw = img.naturalWidth;
-      var ih = img.naturalHeight;
+    // ====================================================================
+    // CRITICAL: 100% STAR WATERMARK ELIMINATION
+    // The faint 4-pointed star watermark sits at (x ≈ 1680-1800, y ≈ 870-980).
+    // By taking source height sh = 908 (cropping the bottom 172px),
+    // the watermark at y >= 870 is NEVER rendered onto the canvas!
+    // ====================================================================
+    var srcX = 0;
+    var srcY = 0;
+    var srcW = iw;
+    var srcH = ih - 172; // 908px height - 100% watermark-free
 
-      // Calculate object-fit: cover scaling
-      var scale = Math.max(cw / iw, ch / ih);
-      var dw = iw * scale;
-      var dh = ih * scale;
-      var dx = (cw - dw) * 0.5;
-      var dy = (ch - dh) * 0.5;
-
-      ctx.clearRect(0, 0, cw, ch);
-      ctx.drawImage(img, dx, dy, dw, dh);
-      lastDrawnFrame = idx;
+    var scale = Math.max(cw / srcW, ch / srcH);
+    if (ch > cw * 1.05) {
+      scale = (ch / srcH) * 1.04;
     }
 
-    // Calculate exact scroll progress inside the hero track
-    function updateScrollProgress(){
-      if(reduce){
-        targetFrame = 0;
-        currentFrame = 0;
-        drawFrame(0);
-        return;
-      }
-      var rect = heroTrack.getBoundingClientRect();
-      var maxScroll = rect.height - window.innerHeight;
-      if(maxScroll <= 0){
-        targetFrame = 0;
-        return;
-      }
-      // Distance scrolled past the top of the track
-      var scrolled = -rect.top;
-      var progress = scrolled / maxScroll;
-      if(progress < 0) progress = 0;
-      if(progress > 1) progress = 1;
+    var dw = srcW * scale;
+    var dh = srcH * scale;
+    var dx = (cw - dw) / 2;
+    var dy = (ch - dh) / 2;
 
-      targetFrame = progress * (totalFrames - 1);
+    this.ctx.drawImage(img, srcX, srcY, srcW, srcH, dx, dy, dw, dh);
+  };
+
+  // Initialize all CanvasScrubbers
+  var scrubbers = [];
+  document.querySelectorAll(".scrub-canvas").forEach(function (canvas) {
+    var folder = canvas.getAttribute("data-folder");
+    if (folder) {
+      var sc = new CanvasScrubber(canvas, folder);
+      scrubbers.push(sc);
+    }
+  });
+
+  // ------------------------------------------------------------------------
+  // 4. ZERO-LAYOUT-THRASHING HIGH-PERFORMANCE SCROLL CONTROLLER
+  // ------------------------------------------------------------------------
+  var cachedTracks = [];
+  var filmBottomOffset = 0;
+
+  function updateTrackCache() {
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    cachedTracks = chapterTracks.map(function (track, idx) {
+      var rect = track.getBoundingClientRect();
+      var top = scrollY + rect.top;
+      var height = track.offsetHeight;
+      var scrollable = Math.max(height - window.innerHeight, 1);
+      var canvas = track.querySelector(".scrub-canvas");
+      var kineticWords = track.querySelectorAll(".kinetic-word");
+      var scrubber = null;
+      if (canvas) {
+        for (var k = 0; k < scrubbers.length; k++) {
+          if (scrubbers[k].canvas === canvas) {
+            scrubber = scrubbers[k];
+            break;
+          }
+        }
+      }
+      return {
+        el: track,
+        top: top,
+        height: height,
+        scrollable: scrollable,
+        scrubber: scrubber,
+        kineticWords: kineticWords,
+        chapterNum: parseInt(track.getAttribute("data-chapter") || (idx + 1), 10),
+        chapterName: track.getAttribute("data-name") || "CHAPTER " + (idx + 1)
+      };
+    });
+
+    if (filmContainer) {
+      var filmRect = filmContainer.getBoundingClientRect();
+      filmBottomOffset = scrollY + filmRect.bottom;
+    } else if (cachedTracks.length > 0) {
+      var lastTrack = cachedTracks[cachedTracks.length - 1];
+      filmBottomOffset = lastTrack.top + lastTrack.height;
+    }
+  }
+
+  function handleScroll() {
+    var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    var globalProgress = docHeight > 0 ? scrollY / docHeight : 0;
+
+    // 1. Update Global Progress Timeline Bar
+    if (timelineBar) {
+      timelineBar.style.width = (globalProgress * 100).toFixed(2) + "%";
     }
 
-    // Continuous smooth animation loop using lerp interpolation
-    function animationLoop(){
-      if(!reduce){
-        var delta = targetFrame - currentFrame;
-        // Apple-style smooth ease: 0.12 factor provides snappy yet silky motion
-        if(Math.abs(delta) > 0.001){
-          currentFrame += delta * 0.12;
+    // 2. Navbar elevation on scroll
+    if (navHud) {
+      if (scrollY > 40) {
+        navHud.classList.add("scrolled");
+      } else {
+        navHud.classList.remove("scrolled");
+      }
+    }
+
+    // 3. Process each chapter's progress from CACHED metrics (Zero reflows!)
+    var activeChapterNum = 1;
+    var activeChapterName = "THE AWAKENING";
+
+    for (var i = 0; i < cachedTracks.length; i++) {
+      var t = cachedTracks[i];
+      var localProgress = (scrollY - t.top) / t.scrollable;
+      localProgress = Math.max(0, Math.min(1, localProgress));
+
+      var relTop = t.top - scrollY;
+      var relBottom = relTop + t.height;
+
+      // Active chapter determination
+      if (relTop <= window.innerHeight * 0.45 && relBottom >= window.innerHeight * 0.45) {
+        activeChapterNum = t.chapterNum;
+        activeChapterName = t.chapterName;
+      }
+
+      // Update Scrubber visibility & target progress
+      if (t.scrubber) {
+        var isNearViewport = relBottom >= -window.innerHeight * 0.5 && relTop <= window.innerHeight * 1.5;
+        t.scrubber.isVisible = isNearViewport;
+        if (isNearViewport) {
+          t.scrubber.setProgress(localProgress);
+        }
+      }
+
+      // Kinetic typography scroll parallax
+      if (t.kineticWords && t.kineticWords.length > 0) {
+        var ty = (0.5 - localProgress) * 60;
+        var scale = 0.97 + localProgress * 0.06;
+        for (var w = 0; w < t.kineticWords.length; w++) {
+          t.kineticWords[w].style.transform = "translate3d(0, " + ty.toFixed(1) + "px, 0) scale(" + scale.toFixed(3) + ")";
+        }
+      }
+    }
+
+    // 4. Update Floating Chapter HUD & AUTO-HIDE PAST FILM
+    // CRITICAL: Hide HUD when scrolling into Trust, FAQ, Downloads, or Footer!
+    var isInFilm = scrollY < (filmBottomOffset - window.innerHeight * 0.35);
+    if (chapterHud) {
+      if (isInFilm) {
+        chapterHud.classList.remove("hud-hidden");
+      } else {
+        chapterHud.classList.add("hud-hidden");
+      }
+    }
+
+    if (activeChapterNum !== currentActiveChapter) {
+      currentActiveChapter = activeChapterNum;
+      var totalChapters = cachedTracks.length;
+      if (hudCounter) {
+        hudCounter.textContent = (activeChapterNum < 10 ? "0" + activeChapterNum : activeChapterNum) + " / " + (totalChapters < 10 ? "0" + totalChapters : totalChapters);
+      }
+      if (hudTitle) {
+        hudTitle.textContent = activeChapterName;
+      }
+      if (hudBarFill) {
+        hudBarFill.style.width = ((activeChapterNum / totalChapters) * 100).toFixed(1) + "%";
+      }
+
+      // Sync active navbar links (text-only without numbers)
+      document.querySelectorAll(".n-link").forEach(function (link) {
+        var targetCh = parseInt(link.getAttribute("data-target"), 10);
+        if (targetCh === activeChapterNum) {
+          link.classList.add("active");
         } else {
-          currentFrame = targetFrame;
+          link.classList.remove("active");
         }
-
-        var frameToDraw = Math.round(currentFrame);
-        if(frameToDraw < 0) frameToDraw = 0;
-        if(frameToDraw >= totalFrames) frameToDraw = totalFrames - 1;
-
-        if(frameToDraw !== lastDrawnFrame){
-          drawFrame(frameToDraw);
-        }
-      }
-
-      requestAnimationFrame(animationLoop);
-    }
-
-    // Preload frames progressively (key frames first for instant response)
-    function preloadFrames(){
-      // Priority 1: First and last frames for instant initial render
-      var priorityIndexes = [0, 10, 24, 35, 49];
-      priorityIndexes.forEach(function(i){
-        loadSingleFrame(i);
       });
+    }
 
-      // Priority 2: Preload remaining frames
-      for(var i = 0; i < totalFrames; i++){
-        if(priorityIndexes.indexOf(i) === -1){
-          loadSingleFrame(i);
+    // 5. Trust Horizontal Sequence Animation
+    if (trustSequence) {
+      var trustRect = trustSequence.getBoundingClientRect();
+      if (trustRect.top <= window.innerHeight * 0.8 && trustRect.bottom >= 0) {
+        var trustProg = 1 - (trustRect.bottom / (window.innerHeight * 0.8 + trustRect.height));
+        trustProg = Math.max(0, Math.min(1, trustProg));
+        var steps = trustSequence.querySelectorAll(".seq-step");
+        var activeStep = Math.min(Math.floor(trustProg * steps.length), steps.length - 1);
+        steps.forEach(function (step, sIdx) {
+          if (sIdx <= activeStep) {
+            step.classList.add("active");
+          } else {
+            step.classList.remove("active");
+          }
+        });
+        var fillLine = trustSequence.querySelector(".seq-line-fill");
+        if (fillLine) {
+          fillLine.style.width = (trustProg * 100).toFixed(1) + "%";
         }
       }
     }
+  }
 
-    function loadSingleFrame(i){
-      if(images[i]) return;
-      var img = new Image();
-      img.src = getFrameUrl(i);
-      img.onload = function(){
-        loaded[i] = true;
-        // If this is the first frame or the current active target, render immediately
-        if(i === 0 && lastDrawnFrame === -1){
-          resizeCanvas();
-          drawFrame(0);
-        } else if(Math.round(currentFrame) === i){
-          drawFrame(i);
-        }
-      };
-      // Fallback to alternate naming if needed
-      img.onerror = function(){
-        var fallbackNum = String(i + 1).padStart(3, "0");
-        var fallbackImg = new Image();
-        fallbackImg.src = "khatapng/frame-" + fallbackNum + ".png";
-        fallbackImg.onload = function(){
-          images[i] = fallbackImg;
-          loaded[i] = true;
-          if(Math.round(currentFrame) === i) drawFrame(i);
-        };
-      };
-      images[i] = img;
+  // ------------------------------------------------------------------------
+  // 5. RAF CONTINUOUS RENDER LOOP
+  // ------------------------------------------------------------------------
+  function loop() {
+    for (var i = 0; i < scrubbers.length; i++) {
+      scrubbers[i].updateAndDraw();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  // ------------------------------------------------------------------------
+  // 6. EDITORIAL INTERACTIVE FAQ ACCORDION
+  // ------------------------------------------------------------------------
+  function initFAQ() {
+    var items = document.querySelectorAll(".faq-item");
+    items.forEach(function (item) {
+      var btn = item.querySelector(".faq-question");
+      if (btn) {
+        btn.addEventListener("click", function () {
+          var wasActive = item.classList.contains("active");
+          items.forEach(function (other) {
+            other.classList.remove("active");
+            var otherBtn = other.querySelector(".faq-question");
+            if (otherBtn) otherBtn.setAttribute("aria-expanded", "false");
+          });
+          if (!wasActive) {
+            item.classList.add("active");
+            btn.setAttribute("aria-expanded", "true");
+          }
+        });
+      }
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 7. OS AUTO-DETECTION & DOWNLOAD HUB
+  // ------------------------------------------------------------------------
+  function detectOS() {
+    var ua = navigator.userAgent || navigator.vendor || window.opera || "";
+    var detected = "windows";
+    if (/android/i.test(ua)) detected = "android";
+    else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) detected = "ios";
+    else if (/Macintosh|Mac OS X/.test(ua)) detected = "macos";
+    else if (/Windows/i.test(ua)) detected = "windows";
+
+    var cards = document.querySelectorAll(".dl-card");
+    cards.forEach(function (card) {
+      if (card.getAttribute("data-os") === detected) {
+        card.classList.add("dl-featured");
+      } else {
+        card.classList.remove("dl-featured");
+      }
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 8. MOBILE MENU & NAVIGATION DRAWER
+  // ------------------------------------------------------------------------
+  function initNav() {
+    if (navBurger && mobileNav) {
+      navBurger.addEventListener("click", function () {
+        var isOpen = mobileNav.classList.toggle("open");
+        navBurger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      });
+      mobileNav.querySelectorAll(".m-link").forEach(function (link) {
+        link.addEventListener("click", function () {
+          mobileNav.classList.remove("open");
+          navBurger.setAttribute("aria-expanded", "false");
+        });
+      });
     }
 
-    // Initialize
-    preloadFrames();
-    resizeCanvas();
-    updateScrollProgress();
-
-    window.addEventListener("scroll", updateScrollProgress, {passive: true});
-    window.addEventListener("resize", function(){
-      resizeCanvas();
-      updateScrollProgress();
-    }, {passive: true});
-
-    // Start persistent render loop
-    requestAnimationFrame(animationLoop);
+    // Smooth scroll for in-page links
+    document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
+      anchor.addEventListener("click", function (e) {
+        var href = this.getAttribute("href");
+        if (href === "#") return;
+        var target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: "smooth" });
+        }
+      });
+    });
   }
+
+  // ------------------------------------------------------------------------
+  // 9. FOOTER SIGNATURE LINE INTERSECTION OBSERVER
+  // ------------------------------------------------------------------------
+  function initFooterSignature() {
+    if (!footerSigLine || !("IntersectionObserver" in window)) return;
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          footerSigLine.classList.add("draw");
+        }
+      });
+    }, { threshold: 0.3 });
+    observer.observe(footerSigLine);
+  }
+
+  // ------------------------------------------------------------------------
+  // 10. SUBTLE MOUSE PARALLAX (DESKTOP ONLY, 1-2% MAXIMUM)
+  // ------------------------------------------------------------------------
+  function initMouseParallax() {
+    if (window.matchMedia("(pointer: coarse)").matches || reduceMotion) return;
+    var stages = document.querySelectorAll(".hero-stage-frame, .stage-media-box, .finale-visual-box");
+    window.addEventListener("mousemove", function (e) {
+      var xNorm = (e.clientX / window.innerWidth - 0.5) * 2;
+      var yNorm = (e.clientY / window.innerHeight - 0.5) * 2;
+      var rotY = xNorm * 1.5;
+      var rotX = -yNorm * 1.5;
+      stages.forEach(function (st) {
+        st.style.transform = "perspective(1200px) rotateX(" + rotX.toFixed(2) + "deg) rotateY(" + rotY.toFixed(2) + "deg)";
+      });
+    }, { passive: true });
+  }
+
+  // ------------------------------------------------------------------------
+  // 10B. PREMIUM STUDIO CUSTOM CURSOR & MAGNETIC CTA (DESKTOP ONLY)
+  // ------------------------------------------------------------------------
+  function initCursor() {
+    if (window.matchMedia("(pointer: coarse)").matches || window.innerWidth <= 900) return;
+    var dot = document.getElementById("cursorDot");
+    var ring = document.getElementById("cursorRing");
+    if (!dot || !ring) return;
+
+    var mouseX = -100, mouseY = -100;
+    var ringX = -100, ringY = -100;
+    var isVisible = false;
+
+    window.addEventListener("mousemove", function (e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      if (!isVisible) {
+        isVisible = true;
+        ringX = mouseX;
+        ringY = mouseY;
+        dot.style.opacity = "1";
+        ring.style.opacity = "1";
+      }
+      dot.style.transform = "translate3d(" + mouseX + "px, " + mouseY + "px, 0) translate(-50%, -50%)";
+    }, { passive: true });
+
+    window.addEventListener("mouseleave", function () {
+      dot.style.opacity = "0";
+      ring.style.opacity = "0";
+      isVisible = false;
+    });
+
+    function renderCursor() {
+      if (isVisible) {
+        ringX += (mouseX - ringX) * 0.18;
+        ringY += (mouseY - ringY) * 0.18;
+        ring.style.transform = "translate3d(" + ringX.toFixed(2) + "px, " + ringY.toFixed(2) + "px, 0) translate(-50%, -50%)";
+      }
+      requestAnimationFrame(renderCursor);
+    }
+    requestAnimationFrame(renderCursor);
+
+    // Interactive Hover States
+    document.querySelectorAll("a, button, .btn, .nav-item, .faq-question").forEach(function (el) {
+      el.addEventListener("mouseenter", function () {
+        if (el.classList.contains("btn") || el.tagName === "BUTTON") {
+          document.body.classList.add("cursor-hover-btn");
+        } else {
+          document.body.classList.add("cursor-hover-link");
+        }
+      });
+      el.addEventListener("mouseleave", function () {
+        document.body.classList.remove("cursor-hover-btn", "cursor-hover-link");
+      });
+    });
+
+    document.querySelectorAll(".stage-media-box, .hero-stage-frame").forEach(function (el) {
+      el.addEventListener("mouseenter", function () {
+        document.body.classList.add("cursor-hover-media");
+      });
+      el.addEventListener("mouseleave", function () {
+        document.body.classList.remove("cursor-hover-media");
+      });
+    });
+
+    // Magnetic CTA Button Movement (3-6px toward cursor)
+    var magneticBtns = document.querySelectorAll(".btn.solid.glow, .nav-cta");
+    magneticBtns.forEach(function (btn) {
+      btn.addEventListener("mousemove", function (e) {
+        var rect = btn.getBoundingClientRect();
+        var relX = e.clientX - (rect.left + rect.width / 2);
+        var relY = e.clientY - (rect.top + rect.height / 2);
+        btn.style.transform = "translate3d(" + (relX * 0.16).toFixed(1) + "px, " + (relY * 0.16).toFixed(1) + "px, 0)";
+      });
+      btn.addEventListener("mouseleave", function () {
+        btn.style.transform = "translate3d(0, 0, 0)";
+      });
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // 11. ORIENTATION & RESIZE HANDLING
+  // ------------------------------------------------------------------------
+  function onResizeOrOrientation() {
+    isMobile = window.matchMedia("(max-width: 768px)").matches;
+    scrubbers.forEach(function (sc) { sc.resize(); });
+    updateTrackCache();
+    handleScroll();
+  }
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  window.addEventListener("resize", onResizeOrOrientation, { passive: true });
+  window.addEventListener("orientationchange", function () {
+    setTimeout(onResizeOrOrientation, 200);
+  });
+
+  // Boot sequence
+  initLoadingSequence();
+  initNav();
+  initFAQ();
+  detectOS();
+  initFooterSignature();
+  initMouseParallax();
+  initCursor();
+
+  // Initial layout cache and frame render
+  updateTrackCache();
+  handleScroll();
+  requestAnimationFrame(loop);
+
 })();
